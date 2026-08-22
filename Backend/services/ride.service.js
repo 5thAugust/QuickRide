@@ -124,11 +124,11 @@ module.exports.notifyNearbyCaptains = async ({ ride, pickup, vehicleType }) => {
     const captainsInRadius = await mapService.getCaptainsInTheRadius(
       pickupCoordinates.ltd,
       pickupCoordinates.lng,
-      4,
+      mapService.DEFAULT_SEARCH_RADIUS_KM,
       vehicleType
     );
     console.log(
-      `[notifyNearbyCaptains] ${captainsInRadius.length} captain(s) matched within 4km radius`
+      `[notifyNearbyCaptains] ${captainsInRadius.length} captain(s) matched within ${mapService.DEFAULT_SEARCH_RADIUS_KM}km radius`
     );
 
     const rideWithUser = await rideModel

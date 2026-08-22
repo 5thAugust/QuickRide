@@ -14,20 +14,56 @@ const MOCK_CENTER = { ltd: 21.0285, lng: 105.8542 };
 // location elsewhere in Vietnam
 const HANOI_VIEWBOX = "105.5,21.3,106.1,20.85";
 
-async function geocodeWithNominatim(address) {
+// Nominatim's free-text search often can't resolve a full Vietnamese street
+// address with house number/alley ("số 12, ngõ 75, phố ...") and returns no
+// results at all, even though the underlying street is well known. Strip
+// that prefix and retry with just the street/area name before giving up.
+// Tokenized by whitespace rather than \b regex boundaries — Vietnamese
+// diacritics (ố, ẫ, ệ...) aren't in JS's ASCII-only \w, so \b silently fails
+// to match around them.
+const ADDRESS_NOISE_WORDS = new Set(["số", "nhà", "ngõ", "hẻm", "ngách"]);
+
+function simplifyVietnameseAddress(address) {
+  const words = address.replace(/,/g, " ").split(/\s+/).filter(Boolean);
+  const kept = [];
+
+  for (let i = 0; i < words.length; i++) {
+    if (ADDRESS_NOISE_WORDS.has(words[i].toLowerCase())) {
+      if (words[i + 1] && /^\d+\w*$/.test(words[i + 1])) {
+        i++; // also drop the house/alley number right after it
+      }
+      continue;
+    }
+    kept.push(words[i]);
+  }
+
+  return kept.join(" ").trim();
+}
+
+async function queryNominatim(query) {
   const url =
     `https://nominatim.openstreetmap.org/search?format=json&limit=1` +
     `&countrycodes=vn&viewbox=${HANOI_VIEWBOX}&bounded=1` +
-    `&q=${encodeURIComponent(address)}`;
+    `&q=${encodeURIComponent(query)}`;
   const response = await axios.get(url, {
     headers: { "User-Agent": "QuickRide-Dev/1.0 (local testing)" },
     timeout: 5000,
   });
   const result = response.data?.[0];
-  if (!result) {
-    throw new Error("No geocoding results");
+  return result ? { ltd: parseFloat(result.lat), lng: parseFloat(result.lon) } : null;
+}
+
+async function geocodeWithNominatim(address) {
+  const direct = await queryNominatim(address);
+  if (direct) return direct;
+
+  const simplified = simplifyVietnameseAddress(address);
+  if (simplified && simplified !== address) {
+    const fallback = await queryNominatim(simplified);
+    if (fallback) return fallback;
   }
-  return { ltd: parseFloat(result.lat), lng: parseFloat(result.lon) };
+
+  throw new Error("No geocoding results");
 }
 
 module.exports.haversineDistanceMeters = haversineDistanceMeters;
@@ -196,6 +232,12 @@ module.exports.getAutoCompleteSuggestions = async (input) => {
     throw err;
   }
 };
+
+// Free Nominatim geocoding can land a few km off the real address (wrong
+// same-named place, or house-number/alley details it can't resolve
+// precisely) — a wider radius than a "true" 4km absorbs that noise without
+// needing a paid geocoding API.
+module.exports.DEFAULT_SEARCH_RADIUS_KM = 7;
 
 module.exports.getCaptainsInTheRadius = async (ltd, lng, radius, vehicleType) => {
   // radius in km

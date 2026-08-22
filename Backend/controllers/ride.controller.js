@@ -222,7 +222,7 @@ module.exports.cancelRide = async (req, res) => {
     const captainsInRadius = await mapService.getCaptainsInTheRadius(
       pickupCoordinates.ltd,
       pickupCoordinates.lng,
-      4,
+      mapService.DEFAULT_SEARCH_RADIUS_KM,
       ride.vehicle
     );
 
