@@ -31,6 +31,17 @@ module.exports.createCaptain = async (
       capacity,
       type,
     },
+    // location.coordinates is a required GeoJSON field (needed for the
+    // $geoWithin/$centerSphere radius search in map.service.js), but nothing
+    // collects a real GPS fix at signup time. Seed a placeholder — Hanoi
+    // Hoan Kiem Lake, matching map.service.js's MOCK_CENTER — so
+    // registration doesn't fail validation. CaptainHomeScreen.jsx overwrites
+    // this with the captain's real position via the "update-location-captain"
+    // socket event as soon as they open the app and grant geolocation.
+    location: {
+      type: "Point",
+      coordinates: [105.8542, 21.0285],
+    },
   });
 
   return captain;
