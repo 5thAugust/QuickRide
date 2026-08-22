@@ -235,14 +235,23 @@ function UserHomeScreen() {
 
   // Socket Events
   useEffect(() => {
-    if (user._id) {
-      socket.emit("join", {
-        userId: user._id,
-        userType: "user",
-      });
-    }
+    const joinAsUser = () => {
+      if (user._id) {
+        socket.emit("join", {
+          userId: user._id,
+          userType: "user",
+        });
+      }
+    };
 
-    socket.on("ride-confirmed", (data) => {
+    // Re-announce this user's socketId on every (re)connect, not just on
+    // mount — see the same fix in CaptainHomeScreen.jsx for why: without it,
+    // a WebSocket drop/reconnect leaves user.socketId in the DB stale, and
+    // "ride-confirmed"/"ride-started"/"ride-ended" never arrive again.
+    socket.on("connect", joinAsUser);
+    joinAsUser();
+
+    const handleRideConfirmed = (data) => {
       Console.log("Clearing Timeout", rideTimeout);
       clearTimeout(rideTimeout.current);
       Console.log("Cleared Timeout");
@@ -252,16 +261,16 @@ function UserHomeScreen() {
         `https://www.google.com/maps?q=${data.captain.location.coordinates[1]},${data.captain.location.coordinates[0]} to ${pickupLocation}&output=embed`
       );
       setConfirmedRideData(data);
-    });
+    };
 
-    socket.on("ride-started", (data) => {
+    const handleRideStarted = (data) => {
       Console.log("Ride started");
       setMapLocation(
         `https://www.google.com/maps?q=${data.pickup} to ${data.destination}&output=embed`
       );
-    });
+    };
 
-    socket.on("ride-ended", (data) => {
+    const handleRideEnded = (data) => {
       Console.log("Ride Ended");
       setShowRideDetailsPanel(false);
       setShowSelectVehiclePanel(false);
@@ -282,7 +291,18 @@ function UserHomeScreen() {
           }
         );
       }
-    });
+    };
+
+    socket.on("ride-confirmed", handleRideConfirmed);
+    socket.on("ride-started", handleRideStarted);
+    socket.on("ride-ended", handleRideEnded);
+
+    return () => {
+      socket.off("connect", joinAsUser);
+      socket.off("ride-confirmed", handleRideConfirmed);
+      socket.off("ride-started", handleRideStarted);
+      socket.off("ride-ended", handleRideEnded);
+    };
   }, [user]);
 
   // Get ride details

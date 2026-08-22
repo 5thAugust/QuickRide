@@ -217,38 +217,56 @@ function CaptainHomeScreen() {
   useEffect(() => {
     let watchId;
 
-    if (captain._id) {
-      socket.emit("join", {
-        userId: captain._id,
-        userType: "captain",
-      });
-
-      // Keep broadcasting the captain's real, current GPS position (not just
-      // a single snapshot taken at mount, which can go stale or miss the
-      // location entirely if the permission prompt hadn't resolved yet).
-      if (navigator.geolocation) {
-        watchId = navigator.geolocation.watchPosition(
-          broadcastPosition,
-          logGeoError,
-          { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
-        );
+    const joinAsCaptain = () => {
+      if (captain._id) {
+        socket.emit("join", {
+          userId: captain._id,
+          userType: "captain",
+        });
       }
+    };
+
+    // Re-announce this captain's socketId on every (re)connect, not just on
+    // mount. Socket.IO reconnects with a brand-new socket.id after any drop
+    // (network blip, tab backgrounded into the browser's back/forward
+    // cache, laptop sleep/wake) — without re-joining, captain.socketId in
+    // the DB keeps pointing at a dead connection, so sendMessageToSocketId()
+    // silently no-ops and this captain stops getting "new-ride" events until
+    // a full page reload.
+    socket.on("connect", joinAsCaptain);
+    joinAsCaptain();
+
+    // Keep broadcasting the captain's real, current GPS position (not just
+    // a single snapshot taken at mount, which can go stale or miss the
+    // location entirely if the permission prompt hadn't resolved yet).
+    if (captain._id && navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(
+        broadcastPosition,
+        logGeoError,
+        { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 }
+      );
     }
 
-    socket.on("new-ride", (data) => {
+    const handleNewRide = (data) => {
       Console.log("New Ride available:", data);
       setShowBtn("accept");
       setNewRide(data);
       setShowNewRidePanel(true);
-    });
+    };
 
-    socket.on("ride-cancelled", (data) => {
+    const handleRideCancelled = (data) => {
       Console.log("Ride cancelled", data);
       updateLocation();
       clearRideData();
-    });
+    };
+
+    socket.on("new-ride", handleNewRide);
+    socket.on("ride-cancelled", handleRideCancelled);
 
     return () => {
+      socket.off("connect", joinAsCaptain);
+      socket.off("new-ride", handleNewRide);
+      socket.off("ride-cancelled", handleRideCancelled);
       if (watchId !== undefined && navigator.geolocation) {
         navigator.geolocation.clearWatch(watchId);
       }
