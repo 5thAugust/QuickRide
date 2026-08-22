@@ -2,7 +2,6 @@ const captainModel = require("../models/captain.model");
 const rideModel = require("../models/ride.model");
 const mapService = require("./map.service");
 const { sendMessageToSocketId } = require("../socket");
-const crypto = require("crypto");
 
 const getFare = async (pickup, destination) => {
   if (!pickup || !destination) {
@@ -44,16 +43,6 @@ const getFare = async (pickup, destination) => {
 
 module.exports.getFare = getFare;
 
-function getOtp(num) {
-  function generateOtp(num) {
-    const otp = crypto
-      .randomInt(Math.pow(10, num - 1), Math.pow(10, num))
-      .toString();
-    return otp;
-  }
-  return generateOtp(num);
-}
-
 module.exports.createRide = async ({
   user,
   pickup,
@@ -71,7 +60,6 @@ module.exports.createRide = async ({
       user,
       pickup,
       destination,
-      otp: getOtp(6),
       fare: fare[vehicleType],
       vehicle: vehicleType,
       distance: distanceTime.distance.value,
@@ -174,8 +162,7 @@ module.exports.confirmRide = async ({ rideId, captain }) => {
         _id: rideId,
       })
       .populate("user")
-      .populate("captain")
-      .select("+otp");
+      .populate("captain");
 
     if (!ride) {
       throw new Error("Ride not found");
@@ -188,9 +175,9 @@ module.exports.confirmRide = async ({ rideId, captain }) => {
   }
 };
 
-module.exports.startRide = async ({ rideId, otp, captain }) => {
-  if (!rideId || !otp) {
-    throw new Error("Ride id and OTP are required");
+module.exports.startRide = async ({ rideId, captain }) => {
+  if (!rideId) {
+    throw new Error("Ride id is required");
   }
 
   const ride = await rideModel
@@ -198,8 +185,7 @@ module.exports.startRide = async ({ rideId, otp, captain }) => {
       _id: rideId,
     })
     .populate("user")
-    .populate("captain")
-    .select("+otp");
+    .populate("captain");
 
   if (!ride) {
     throw new Error("Ride not found");
@@ -207,10 +193,6 @@ module.exports.startRide = async ({ rideId, otp, captain }) => {
 
   if (ride.status !== "accepted") {
     throw new Error("Ride not accepted");
-  }
-
-  if (ride.otp !== otp) {
-    throw new Error("Invalid OTP");
   }
 
   await rideModel.findOneAndUpdate(
@@ -236,8 +218,7 @@ module.exports.endRide = async ({ rideId, captain }) => {
       captain: captain._id,
     })
     .populate("user")
-    .populate("captain")
-    .select("+otp");
+    .populate("captain");
 
   if (!ride) {
     throw new Error("Ride not found");

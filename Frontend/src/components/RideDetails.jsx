@@ -68,9 +68,6 @@ function RideDetails({
                   {confirmedRideData?.captain?.vehicle?.color}{" "}
                   {confirmedRideData?.captain?.vehicle?.type}
                 </h1>
-                <span className="mt-1 inline-block bg-black text-white px-3 py-1 rounded font-semibold">
-                  OTP: {confirmedRideData?.otp}
-                </span>
               </div>
             )}
           </div>

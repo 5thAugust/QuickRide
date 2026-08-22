@@ -10,8 +10,6 @@ import { formatCurrency } from "../utils/currency";
 
 function NewRide({
   rideData,
-  otp,
-  setOtp,
   showBtn,
   showPanel,
   setShowPanel,
@@ -19,8 +17,7 @@ function NewRide({
   loading,
   acceptRide,
   endRide,
-  verifyOTP,
-  error,
+  startRide,
 }) {
   const ignoreRide = () => {
     setShowPanel(false);
@@ -166,22 +163,13 @@ function NewRide({
               />
               <Button title={"Chấp nhận"} fun={acceptRide} loading={loading} />
             </div>
-          ) : showBtn == "otp" ? (
-            <>
-              <input
-                type="number"
-                minLength={6}
-                maxLength={6}
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder={"Nhập mã OTP"}
-                className="w-full bg-zinc-100 px-4 py-3 rounded-lg outline-none text-sm mb-2"
-              />
-              {error && (
-                <p className="text-red-500 text-xs mb-2 text-center">{error}</p>
-              )}
-              <Button title={"Xác minh OTP"} loading={loading} fun={verifyOTP} />{" "}
-            </>
+          ) : showBtn == "start" ? (
+            <Button
+              title={"Bắt đầu chuyến"}
+              fun={startRide}
+              loading={loading}
+              classes={"bg-green-600 "}
+            />
           ) : (
             <Button
               title={"Kết thúc chuyến"}

@@ -59,11 +59,9 @@ function CaptainHomeScreen() {
     JSON.parse(localStorage.getItem("rideDetails")) || defaultRideData
   );
 
-  const [otp, setOtp] = useState("");
   const [messages, setMessages] = useState(
     JSON.parse(localStorage.getItem("messages")) || []
   );
-  const [error, setError] = useState("");
 
   // Panels
   const [showCaptainDetailsPanel, setShowCaptainDetailsPanel] = useState(true);
@@ -88,7 +86,7 @@ function CaptainHomeScreen() {
           }
         );
         setLoading(false);
-        setShowBtn("otp");
+        setShowBtn("start");
         setMapLocation(
           `https://www.google.com/maps?q=${riderLocation.ltd},${riderLocation.lng} to ${newRide.pickup}&output=embed`
         );
@@ -104,12 +102,12 @@ function CaptainHomeScreen() {
     }
   };
 
-  const verifyOTP = async () => {
+  const startRide = async () => {
     try {
-      if (newRide._id != "" && otp.length == 6) {
+      if (newRide._id != "") {
         setLoading(true);
         const response = await axios.get(
-          `${import.meta.env.VITE_SERVER_URL}/ride/start-ride?rideId=${newRide._id}&otp=${otp}`,
+          `${import.meta.env.VITE_SERVER_URL}/ride/start-ride?rideId=${newRide._id}`,
           {
             headers: {
               token: token,
@@ -125,7 +123,7 @@ function CaptainHomeScreen() {
       }
     } catch (err) {
       setLoading(false);
-      setError("Mã OTP không hợp lệ");
+      showAlert('Đã xảy ra lỗi', err.response?.data?.message || 'Không thể bắt đầu chuyến đi', 'failure');
       Console.log(err);
     }
   };
@@ -466,17 +464,14 @@ function CaptainHomeScreen() {
 
       <NewRide
         rideData={newRide}
-        otp={otp}
-        setOtp={setOtp}
         showBtn={showBtn}
         showPanel={showNewRidePanel}
         setShowPanel={setShowNewRidePanel}
         showPreviousPanel={setShowCaptainDetailsPanel}
         loading={loading}
         acceptRide={acceptRide}
-        verifyOTP={verifyOTP}
+        startRide={startRide}
         endRide={endRide}
-        error={error}
       />
     </div>
   );
