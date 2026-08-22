@@ -1,21 +1,71 @@
 const axios = require("axios");
 const captainModel = require("../models/captain.model");
 
-// Hanoi Hoan Kiem Lake, used to center mocked coordinates when no API key is configured
+// Hanoi Hoan Kiem Lake, used as a last-resort fallback center when the free
+// geocoder can't resolve an address and no Google Maps API key is configured
 const MOCK_CENTER = { ltd: 21.0285, lng: 105.8542 };
+
+// Free, no-API-key geocoder (OpenStreetMap Nominatim) used as a stand-in for
+// Google Geocoding when GOOGLE_MAPS_API isn't configured, so mocked pickup/
+// destination coordinates actually reflect the address typed by the user
+// instead of a random point (which broke nearby-captain matching).
+// Rough Hanoi bounding box (west,north,east,south) — biases short/ambiguous
+// place names (e.g. "xuân thủy" alone) toward Hanoi instead of a same-named
+// location elsewhere in Vietnam
+const HANOI_VIEWBOX = "105.5,21.3,106.1,20.85";
+
+async function geocodeWithNominatim(address) {
+  const url =
+    `https://nominatim.openstreetmap.org/search?format=json&limit=1` +
+    `&countrycodes=vn&viewbox=${HANOI_VIEWBOX}&bounded=1` +
+    `&q=${encodeURIComponent(address)}`;
+  const response = await axios.get(url, {
+    headers: { "User-Agent": "QuickRide-Dev/1.0 (local testing)" },
+    timeout: 5000,
+  });
+  const result = response.data?.[0];
+  if (!result) {
+    throw new Error("No geocoding results");
+  }
+  return { ltd: parseFloat(result.lat), lng: parseFloat(result.lon) };
+}
+
+function haversineDistanceMeters(a, b) {
+  const R = 6371000;
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRad(b.ltd - a.ltd);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.ltd);
+  const lat2 = toRad(b.ltd);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
 
 module.exports.getAddressCoordinate = async (address) => {
   const apiKey = process.env.GOOGLE_MAPS_API;
 
   if (!apiKey) {
-    console.warn(
-      "[map.service] GOOGLE_MAPS_API not set — returning mocked coordinates for:",
-      address
-    );
-    return {
-      ltd: MOCK_CENTER.ltd + (Math.random() - 0.5) * 0.05,
-      lng: MOCK_CENTER.lng + (Math.random() - 0.5) * 0.05,
-    };
+    try {
+      const coords = await geocodeWithNominatim(address);
+      console.warn(
+        "[map.service] GOOGLE_MAPS_API not set — geocoded via Nominatim:",
+        address,
+        coords
+      );
+      return coords;
+    } catch (err) {
+      console.warn(
+        "[map.service] Nominatim geocoding failed, falling back to mock center for:",
+        address,
+        err.message
+      );
+      return {
+        ltd: MOCK_CENTER.ltd + (Math.random() - 0.5) * 0.02,
+        lng: MOCK_CENTER.lng + (Math.random() - 0.5) * 0.02,
+      };
+    }
   }
 
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
@@ -46,18 +96,44 @@ module.exports.getDistanceTime = async (origin, destination) => {
   const apiKey = process.env.GOOGLE_MAPS_API;
 
   if (!apiKey) {
-    console.warn(
-      "[map.service] GOOGLE_MAPS_API not set — returning mocked distance/time for:",
-      origin,
-      "->",
-      destination
-    );
-    const distanceKm = Math.round((2 + Math.random() * 13) * 10) / 10; // 2–15 km
-    const durationMin = Math.round(distanceKm * (2 + Math.random() * 1.5)); // ~2-3.5 min/km
-    return {
-      distance: { value: Math.round(distanceKm * 1000), text: `${distanceKm} km` },
-      duration: { value: durationMin * 60, text: `${durationMin} mins` },
-    };
+    try {
+      const [originCoords, destCoords] = await Promise.all([
+        geocodeWithNominatim(origin),
+        geocodeWithNominatim(destination),
+      ]);
+      const straightLineMeters = haversineDistanceMeters(originCoords, destCoords);
+      // roads are never a straight line — pad by ~35% to approximate real route distance
+      const distanceMeters = Math.round(straightLineMeters * 1.35);
+      const avgSpeedKmh = 25; // rough average city driving speed
+      const durationSeconds = Math.round((distanceMeters / 1000 / avgSpeedKmh) * 3600);
+      console.warn(
+        "[map.service] GOOGLE_MAPS_API not set — estimated distance/time via Nominatim:",
+        origin,
+        "->",
+        destination
+      );
+      return {
+        distance: {
+          value: distanceMeters,
+          text: `${(distanceMeters / 1000).toFixed(1)} km`,
+        },
+        duration: {
+          value: durationSeconds,
+          text: `${Math.round(durationSeconds / 60)} mins`,
+        },
+      };
+    } catch (err) {
+      console.warn(
+        "[map.service] Nominatim estimate failed, falling back to random mock:",
+        err.message
+      );
+      const distanceKm = Math.round((2 + Math.random() * 13) * 10) / 10; // 2–15 km
+      const durationMin = Math.round(distanceKm * (2 + Math.random() * 1.5)); // ~2-3.5 min/km
+      return {
+        distance: { value: Math.round(distanceKm * 1000), text: `${distanceKm} km` },
+        duration: { value: durationMin * 60, text: `${durationMin} mins` },
+      };
+    }
   }
 
   const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(
