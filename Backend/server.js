@@ -16,6 +16,7 @@ const captainRoutes = require("./routes/captain.routes");
 const mapsRoutes = require("./routes/maps.routes");
 const rideRoutes = require("./routes/ride.routes");
 const mailRoutes = require("./routes/mail.routes");
+const bookingRoutes = require("./routes/booking.routes");
 const dbStream = require("./services/logging.service");
 require("./config/db");
 const PORT = process.env.PORT || 4000;
@@ -47,6 +48,7 @@ app.use("/captain", captainRoutes);
 app.use("/map", mapsRoutes);
 app.use("/ride", rideRoutes);
 app.use("/mail", mailRoutes);
+app.use("/bookings", bookingRoutes);
 
 server.listen(PORT, () => {
   console.log("Server is listening on port", PORT);

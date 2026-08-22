@@ -1,6 +1,7 @@
 const captainModel = require("../models/captain.model");
 const rideModel = require("../models/ride.model");
 const mapService = require("./map.service");
+const { sendMessageToSocketId } = require("../socket");
 const crypto = require("crypto");
 
 const getFare = async (pickup, destination) => {
@@ -80,6 +81,35 @@ module.exports.createRide = async ({
     return ride;
   } catch (error) {
     throw new Error("Error occured while creating ride.");
+  }
+};
+
+// Fire-and-forget: finds nearby captains for a freshly created ride and pings
+// them over the socket. Shared by the in-app ride flow and the Super App
+// booking flow so both notify captains the same way.
+module.exports.notifyNearbyCaptains = async ({ ride, pickup, vehicleType }) => {
+  try {
+    const pickupCoordinates = await mapService.getAddressCoordinate(pickup);
+
+    const captainsInRadius = await mapService.getCaptainsInTheRadius(
+      pickupCoordinates.ltd,
+      pickupCoordinates.lng,
+      4,
+      vehicleType
+    );
+
+    const rideWithUser = await rideModel
+      .findOne({ _id: ride._id })
+      .populate("user");
+
+    captainsInRadius.forEach((captain) => {
+      sendMessageToSocketId(captain.socketId, {
+        event: "new-ride",
+        data: rideWithUser,
+      });
+    });
+  } catch (e) {
+    console.error("Background captain-matching task failed:", e.message);
   }
 };
 

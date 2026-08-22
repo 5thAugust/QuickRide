@@ -64,39 +64,7 @@ module.exports.createRide = async (req, res) => {
 
     res.status(201).json(ride);
 
-    Promise.resolve().then(async () => {
-      try {
-        const pickupCoordinates = await mapService.getAddressCoordinate(pickup);
-        console.log("Pickup Coordinates", pickupCoordinates);
-
-        const captainsInRadius = await mapService.getCaptainsInTheRadius(
-          pickupCoordinates.ltd,
-          pickupCoordinates.lng,
-          4,
-          vehicleType
-        );
-
-        ride.otp = "";
-
-        const rideWithUser = await rideModel
-          .findOne({ _id: ride._id })
-          .populate("user");
-
-        console.log(
-          captainsInRadius.map(
-            (ride) => `${ride.fullname.firstname} ${ride.fullname.lastname} `
-          )
-        );
-        captainsInRadius.map((captain) => {
-          sendMessageToSocketId(captain.socketId, {
-            event: "new-ride",
-            data: rideWithUser,
-          });
-        });
-      } catch (e) {
-        console.error("Background task failed:", e.message);
-      }
-    });
+    rideService.notifyNearbyCaptains({ ride, pickup, vehicleType });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

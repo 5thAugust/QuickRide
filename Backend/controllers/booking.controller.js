@@ -1,0 +1,128 @@
+const mongoose = require("mongoose");
+const { validationResult } = require("express-validator");
+const rideModel = require("../models/ride.model");
+const rideService = require("../services/ride.service");
+const userService = require("../services/user.service");
+
+const BOOKING_PREFIX = "RIDE-";
+
+const STATUS_MAP = {
+  pending: "searching",
+  accepted: "accepted",
+  ongoing: "ongoing",
+  completed: "completed",
+  cancelled: "cancelled",
+};
+
+function toBookingId(rideId) {
+  return `${BOOKING_PREFIX}${rideId}`;
+}
+
+function toRideId(bookingId) {
+  return bookingId.startsWith(BOOKING_PREFIX)
+    ? bookingId.slice(BOOKING_PREFIX.length)
+    : bookingId;
+}
+
+function buildDriver(captain) {
+  if (!captain) return null;
+  return {
+    name: `${captain.fullname.firstname} ${captain.fullname.lastname || ""}`.trim(),
+    phone: captain.phone,
+    plate: captain.vehicle?.number,
+  };
+}
+
+function buildMessage(status, driver) {
+  switch (status) {
+    case "searching":
+      return "Đang tìm tài xế phù hợp gần bạn...";
+    case "accepted":
+      return driver
+        ? `Tài xế ${driver.name} đã nhận chuyến của bạn (biển số ${driver.plate}) và sẽ sớm liên hệ với bạn.`
+        : "Tài xế đã nhận chuyến của bạn.";
+    case "ongoing":
+      return "Chuyến đi đang diễn ra.";
+    case "completed":
+      return "Chuyến đi đã hoàn tất. Cảm ơn bạn đã sử dụng QuickRide!";
+    case "cancelled":
+      return "Chuyến đi đã bị hủy.";
+    default:
+      return undefined;
+  }
+}
+
+module.exports.createBooking = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { pickup, destination, vehicle_type, customer } = req.body;
+
+  try {
+    const user = await userService.findOrCreateByEmail({
+      email: customer.email,
+      firstName: customer.first_name,
+      lastName: customer.last_name,
+      phone: customer.phone_number,
+      username: customer.username,
+    });
+
+    const ride = await rideService.createRide({
+      user: user._id,
+      pickup,
+      destination,
+      vehicleType: vehicle_type,
+    });
+
+    user.rides.push(ride._id);
+    await user.save();
+
+    res.status(201).json({
+      booking_id: toBookingId(ride._id),
+      status: "searching",
+      message: buildMessage("searching"),
+    });
+
+    rideService.notifyNearbyCaptains({ ride, pickup, vehicleType: vehicle_type });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: err.message || "Không thể tạo chuyến đi." });
+  }
+};
+
+module.exports.getBookingStatus = async (req, res) => {
+  const rawBookingId = req.query.booking_id;
+  if (!rawBookingId) {
+    return res.status(400).json({ message: "booking_id is required" });
+  }
+
+  const rideId = toRideId(rawBookingId);
+  if (!mongoose.Types.ObjectId.isValid(rideId)) {
+    return res.status(400).json({ message: "Invalid booking_id" });
+  }
+
+  try {
+    const ride = await rideModel
+      .findOne({ _id: rideId })
+      .populate("captain", "fullname phone vehicle");
+
+    if (!ride) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const status = STATUS_MAP[ride.status] || ride.status;
+    const driver = buildDriver(ride.captain);
+
+    return res.status(200).json({
+      booking_id: rawBookingId,
+      status,
+      driver,
+      message: buildMessage(status, driver),
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};

@@ -1,4 +1,5 @@
 const userModel = require("../models/user.model");
+const crypto = require("crypto");
 
 module.exports.createUser = async (firstname, lastname, email, password, phone) => {
   if (!firstname || !email || !password || !phone) {
@@ -15,6 +16,38 @@ module.exports.createUser = async (firstname, lastname, email, password, phone) 
     email,
     password: hashedPassword,
     phone,
+  });
+
+  return user;
+};
+
+// Auto-provisioning for server-to-server callers (e.g. a Super App) that have
+// already authenticated the end user themselves: looks the account up by
+// email and transparently creates one on first sight instead of forcing a
+// signup form. A random password is generated since the schema requires one,
+// but the account never logs in through our own password flow.
+module.exports.findOrCreateByEmail = async ({ email, firstName, lastName, phone, username }) => {
+  if (!email) {
+    throw new Error("Customer email is required");
+  }
+
+  const existingUser = await userModel.findOne({ email });
+  if (existingUser) {
+    return existingUser;
+  }
+
+  const randomPassword = await userModel.hashPassword(crypto.randomBytes(24).toString("hex"));
+
+  const user = await userModel.create({
+    fullname: {
+      firstname: firstName || username || "Khach hang",
+      ...(lastName ? { lastname: lastName } : {}),
+    },
+    email,
+    password: randomPassword,
+    ...(phone ? { phone } : {}),
+    // The Super App already verified this person's identity before calling us.
+    emailVerified: true,
   });
 
   return user;
