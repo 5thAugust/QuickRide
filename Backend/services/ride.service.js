@@ -91,11 +91,44 @@ module.exports.notifyNearbyCaptains = async ({ ride, pickup, vehicleType }) => {
   try {
     const pickupCoordinates = await mapService.getAddressCoordinate(pickup);
 
+    // TEMP DEBUG — remove once "captain doesn't get notified" is confirmed
+    // fixed. Shows exactly where matching fails: bad geocoding, no captain
+    // of that vehicle type, everyone too far away, or a captain in range
+    // with no live socketId.
+    const captainsOfType = await captainModel.find(
+      { "vehicle.type": vehicleType },
+      "fullname socketId location vehicle.type"
+    );
+    console.log(
+      `[notifyNearbyCaptains] ride=${ride._id} pickup="${pickup}" -> resolved coords:`,
+      pickupCoordinates
+    );
+    console.log(
+      `[notifyNearbyCaptains] ${captainsOfType.length} captain(s) registered with vehicle.type="${vehicleType}"`
+    );
+    captainsOfType.forEach((c) => {
+      const coords = c.location?.coordinates;
+      const distanceKm = coords
+        ? (
+            mapService.haversineDistanceMeters(pickupCoordinates, {
+              ltd: coords[1],
+              lng: coords[0],
+            }) / 1000
+          ).toFixed(2) + "km"
+        : "no location set";
+      console.log(
+        `  - captain ${c._id} (${c.fullname?.firstname}): socketId=${c.socketId || "NONE"}, distance=${distanceKm}`
+      );
+    });
+
     const captainsInRadius = await mapService.getCaptainsInTheRadius(
       pickupCoordinates.ltd,
       pickupCoordinates.lng,
       4,
       vehicleType
+    );
+    console.log(
+      `[notifyNearbyCaptains] ${captainsInRadius.length} captain(s) matched within 4km radius`
     );
 
     const rideWithUser = await rideModel

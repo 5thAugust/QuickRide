@@ -30,6 +30,8 @@ async function geocodeWithNominatim(address) {
   return { ltd: parseFloat(result.lat), lng: parseFloat(result.lon) };
 }
 
+module.exports.haversineDistanceMeters = haversineDistanceMeters;
+
 function haversineDistanceMeters(a, b) {
   const R = 6371000;
   const toRad = (deg) => (deg * Math.PI) / 180;
