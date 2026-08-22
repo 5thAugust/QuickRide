@@ -52,4 +52,15 @@ app.use("/bookings", bookingRoutes);
 
 server.listen(PORT, () => {
   console.log("Server is listening on port", PORT);
+
+  // TEMP DEBUG — remove once the Super App x-api-key integration is confirmed
+  // working. Never logs the full key, only enough to spot a bad/missing value.
+  const key = process.env.SUPERAPP_API_KEY;
+  if (key) {
+    console.log(
+      `[SUPERAPP_API_KEY] loaded: length=${key.length}, starts="${key.slice(0, 4)}", ends="${key.slice(-4)}", hasWhitespace=${key !== key.trim()}`
+    );
+  } else {
+    console.log("[SUPERAPP_API_KEY] NOT SET — process.env.SUPERAPP_API_KEY is undefined");
+  }
 });

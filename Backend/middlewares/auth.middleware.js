@@ -96,14 +96,17 @@ module.exports.authCaptain = async (req, res, next) => {
 // us directly with no end-user login screen of our own. Trust is a shared
 // API key instead of the cookie/JWT session used by the mini app's own UI.
 module.exports.authSuperApp = (req, res, next) => {
-  const expectedKey = process.env.SUPERAPP_API_KEY;
+  // .trim() guards against a stray leading/trailing space or newline sneaking
+  // into the Render dashboard's env var field or the caller's header value —
+  // without it, a byte-for-byte "correct" key silently fails to match.
+  const expectedKey = (process.env.SUPERAPP_API_KEY || "").trim();
   if (!expectedKey) {
     return res
       .status(500)
       .json({ message: "Super App integration is not configured on this server" });
   }
 
-  const providedKey = req.headers["x-api-key"] || "";
+  const providedKey = (req.headers["x-api-key"] || "").trim();
   const expected = Buffer.from(expectedKey);
   const provided = Buffer.from(providedKey);
 
