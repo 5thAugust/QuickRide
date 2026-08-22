@@ -9,9 +9,11 @@ function Input({ label, type, name, placeholder, defaultValue, register, error, 
           className="w-full inline-block bg-zinc-100 px-4 py-3 rounded-lg outline-none text-sm my-1"
         >
           {options.map((option) => {
+            const value = typeof option === "object" ? option.value : option.toLowerCase();
+            const label = typeof option === "object" ? option.label : option;
             return (
-              <option key={option} value={option.toLowerCase()} className="w-full">
-                {option}
+              <option key={value} value={value} className="w-full">
+                {label}
               </option>
             );
           })}

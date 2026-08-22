@@ -98,7 +98,7 @@ function ChatScreen() {
 
   if (userData) {
     return (
-      <div className="flex flex-col h-dvh">
+      <div className="flex flex-col h-dvh md:max-w-2xl md:mx-auto md:my-12 md:h-[85vh] md:rounded-2xl md:shadow-xl md:border md:border-zinc-100 md:overflow-hidden">
         {/* header */}
         <div className="flex h-fit items-center p-3 bg-white border-b-2 border-b-blue-600 gap-2">
           <ArrowLeft
@@ -145,7 +145,7 @@ function ChatScreen() {
           onSubmit={sendMessage}
         >
           <input
-            placeholder="Enter message..."
+            placeholder="Nhập tin nhắn..."
             className="w-full border-2 border-black outline-none rounded-md p-2"
             value={message}
             onChange={(e) => setMessage(e.target.value)}

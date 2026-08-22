@@ -65,7 +65,7 @@ function CaptainEditProfile() {
     }, 5000);
   }, [responseError]);
   return (
-    <div className="w-full h-dvh flex flex-col justify-between p-4 pt-6">
+    <div className="w-full h-dvh flex flex-col justify-between p-4 pt-6 md:h-auto md:max-w-md md:mx-auto md:my-12 md:rounded-2xl md:shadow-xl md:border md:border-zinc-100 md:p-8 md:justify-start md:gap-6">
       <div className="overflow-auto">
         <div className="flex gap-3">
           <ArrowLeft
@@ -73,7 +73,7 @@ function CaptainEditProfile() {
             className="mt-[5px] cursor-pointer"
             onClick={() => navigation(-1)}
           />
-          <Heading title={"Edit Profile"} />
+          <Heading title={"Chỉnh sửa hồ sơ"} />
         </div>
         <Input
           label={"Email"}
@@ -86,7 +86,7 @@ function CaptainEditProfile() {
         />
         <form onSubmit={handleSubmit(updateUserProfile)}>
           <Input
-            label={"Phone Number"}
+            label={"Số điện thoại"}
             type={"number"}
             name={"phone"}
             register={register}
@@ -95,14 +95,14 @@ function CaptainEditProfile() {
           />
           <div className="flex gap-4 -mb-2">
             <Input
-              label={"First name"}
+              label={"Tên"}
               name={"firstname"}
               register={register}
               error={errors.firstname}
               defaultValue={captain.fullname.firstname}
             />
             <Input
-              label={"Last name"}
+              label={"Họ"}
               name={"lastname"}
               register={register}
               error={errors.lastname}
@@ -111,14 +111,14 @@ function CaptainEditProfile() {
           </div>
           <div className="flex gap-4 -my-2">
             <Input
-              label={"Vehicle colour"}
+              label={"Màu xe"}
               name={"color"}
               register={register}
               error={errors.color}
               defaultValue={captain.vehicle.color}
             />
             <Input
-              label={"Vehicle capacity"}
+              label={"Số chỗ ngồi"}
               type={"number"}
               name={"capacity"}
               register={register}
@@ -127,16 +127,19 @@ function CaptainEditProfile() {
             />
           </div>
           <Input
-            label={"Vehicle number"}
+            label={"Biển số xe"}
             name={"number"}
             register={register}
             error={errors.number}
             defaultValue={captain.vehicle.number}
           />
           <Input
-            label={"Vehicle type"}
+            label={"Loại xe"}
             type={"select"}
-            options={["Car", "Bike", "Auto"]}
+            options={[
+              { value: "car", label: "Xe hơi" },
+              { value: "bike", label: "Xe máy" },
+            ]}
             name={"type"}
             register={register}
             error={errors.type}
@@ -148,7 +151,7 @@ function CaptainEditProfile() {
             </p>
           )}
           <Button
-            title={"Update Profile"}
+            title={"Cập nhật hồ sơ"}
             loading={loading}
             type="submit"
             classes={"mt-4"}

@@ -16,7 +16,6 @@ const captainRoutes = require("./routes/captain.routes");
 const mapsRoutes = require("./routes/maps.routes");
 const rideRoutes = require("./routes/ride.routes");
 const mailRoutes = require("./routes/mail.routes");
-const keepServerRunning = require("./services/active.service");
 const dbStream = require("./services/logging.service");
 require("./config/db");
 const PORT = process.env.PORT || 4000;
@@ -34,10 +33,6 @@ app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-if (process.env.ENVIRONMENT == "production") {
-  keepServerRunning();
-}
 
 app.get("/", (req, res) => {
   res.json("Hello, World!");

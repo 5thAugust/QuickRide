@@ -47,9 +47,9 @@ function CaptainLogin() {
     }, 5000);
   }, [responseError]);
   return (
-    <div className="w-full h-dvh flex flex-col justify-between p-4 pt-6">
+    <div className="w-full h-dvh flex flex-col justify-between p-4 pt-6 md:h-auto md:max-w-md md:mx-auto md:my-12 md:rounded-2xl md:shadow-xl md:border md:border-zinc-100 md:p-8 md:justify-start md:gap-6">
       <div>
-        <Heading title={"Captain Login🚕"} />
+        <Heading title={"Đăng nhập Tài xế🚕"} />
         <form onSubmit={handleSubmit(loginCaptain)}>
           <Input
             label={"Email"}
@@ -59,7 +59,7 @@ function CaptainLogin() {
             error={errors.email}
           />
           <Input
-            label={"Password"}
+            label={"Mật khẩu"}
             type={"password"}
             name={"password"}
             register={register}
@@ -71,14 +71,14 @@ function CaptainLogin() {
             </p>
           )}
           <Link to="/captain/forgot-password" className="text-sm mb-2 inline-block">
-            Forgot Password?
+            Quên mật khẩu?
           </Link>
-          <Button title={"Login"} loading={loading} type="submit" />
+          <Button title={"Đăng nhập"} loading={loading} type="submit" />
         </form>
         <p className="text-sm font-normal text-center mt-4">
-          Don't have an account?{" "}
+          Chưa có tài khoản?{" "}
           <Link to={"/captain/signup"} className="font-semibold">
-            Sign up
+            Đăng ký
           </Link>
         </p>
 
@@ -87,14 +87,14 @@ function CaptainLogin() {
         <Button
           type={"link"}
           path={"/login"}
-          title={"Login as User"}
+          title={"Đăng nhập với vai trò Người dùng"}
           classes={"bg-green-500"}
         />
         <p className="text-xs font-normal text-center self-end mt-6">
-          This site is protected by reCAPTCHA and the Google{" "}
-          <span className="font-semibold underline">Privacy Policy</span> and{" "}
-          <span className="font-semibold underline">Terms of Service</span>{" "}
-          apply.
+          Trang này được bảo vệ bởi reCAPTCHA và áp dụng{" "}
+          <span className="font-semibold underline">Chính sách quyền riêng tư</span> và{" "}
+          <span className="font-semibold underline">Điều khoản dịch vụ</span>{" "}
+          của Google.
         </p>
       </div>
     </div>

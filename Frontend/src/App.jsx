@@ -21,18 +21,16 @@ import {
 import { logger } from "./utils/logger";
 import { SocketDataContext } from "./contexts/SocketContext";
 import { useEffect, useContext } from "react";
-import { ChevronLeft, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 
 function App() {
   return (
-    <div className="w-full h-dvh flex items-center">
-      <div className="relative w-full sm:min-w-96 sm:w-96 h-full bg-white overflow-hidden">
+    <div className="w-full h-dvh bg-white overflow-hidden">
         {/* Force Reset Button to clear data */}
-        <div className="absolute top-36 -right-11 opacity-20 hover:opacity-100 z-50 flex items-center p-1 PL-0 gap-1 bg-zinc-50 border-2 border-r-0 border-gray-300 hover:-translate-x-11 rounded-l-md transition-all duration-300">
-          <ChevronLeft />
+        <div className="fixed bottom-6 right-6 opacity-20 hover:opacity-100 z-50 flex items-center p-1 PL-0 gap-1 bg-zinc-50 border-2 border-gray-300 rounded-md transition-all duration-300">
           <button className="flex justify-center items-center w-10 h-10 rounded-lg border-2 border-red-300 bg-red-200 text-red-500" onClick={() => {
-            alert("This will clear all your data and log you out to fix the app in case it got corrupted. Please confirm to proceed.");
-            const confirmation = confirm("Are you sure you want to reset the app?")
+            alert("Thao tác này sẽ xóa toàn bộ dữ liệu và đăng xuất bạn để khắc phục ứng dụng trong trường hợp bị lỗi. Vui lòng xác nhận để tiếp tục.");
+            const confirmation = confirm("Bạn có chắc chắn muốn đặt lại ứng dụng không?")
 
             if (confirmation === true) {
               localStorage.clear();
@@ -108,14 +106,6 @@ function App() {
             <Route path="*" element={<Error />} />
           </Routes>
         </BrowserRouter>
-      </div>
-      <div className="hidden sm:block w-full h-full bg-[#eae1fe] overflow-hidden  select-none border-l-2 border-black">
-        <img
-          className="h-full object-cover mx-auto  select-none "
-          src="https://img.freepik.com/free-vector/taxi-app-service-concept_23-2148497472.jpg?semt=ais_hybrid"
-          alt="Side image"
-        />
-      </div>
     </div>
   );
 }

@@ -39,11 +39,11 @@ function ForgotPassword() {
                     data
                 );
                 Console.log(response);
-                showAlert('Reset password email sent successfully!', 'Please check your inbox and click on the received link to reset the password', 'success');
+                showAlert('Gửi email đặt lại mật khẩu thành công!', 'Vui lòng kiểm tra hộp thư và nhấp vào liên kết nhận được để đặt lại mật khẩu', 'success');
                 startCooldown();
 
             } catch (error) {
-                showAlert('Some error occured', error.response.data.message, 'failure');
+                showAlert('Đã xảy ra lỗi', error.response.data.message, 'failure');
                 Console.log(error.response.data.message);
             } finally {
                 setLoading(false);
@@ -53,13 +53,13 @@ function ForgotPassword() {
 
     const getButtonTitle = () => {
         if (isActive) {
-            return `Wait ${timeLeft}s`;
+            return `Đợi ${timeLeft}s`;
         }
-        return "Reset Password";
+        return "Đặt lại mật khẩu";
     };
 
     return (
-        <div className="w-full h-dvh flex flex-col text-center p-4 pt-6 gap-24">
+        <div className="w-full h-dvh flex flex-col text-center p-4 pt-6 gap-24 md:h-auto md:max-w-md md:mx-auto md:my-12 md:rounded-2xl md:shadow-xl md:border md:border-zinc-100 md:p-8 md:gap-6">
             <Alert
                 heading={alert.heading}
                 text={alert.text}
@@ -75,9 +75,9 @@ function ForgotPassword() {
                 />
             </div>
             <div className="px-2">
-                <h1 className="text-2xl font-bold">Forgot your Password?</h1>
+                <h1 className="text-2xl font-bold">Quên mật khẩu?</h1>
                 <p className="text-sm mt-3 text-zinc-600 text-balance">
-                    Enter your registered email below to receive password reset link
+                    Nhập email đã đăng ký bên dưới để nhận liên kết đặt lại mật khẩu
                 </p>
                 <img src={mailImg} alt="Verify Email" className="h-36 mx-auto my-8" />
 
@@ -93,7 +93,7 @@ function ForgotPassword() {
                     <Button
                         title={getButtonTitle()}
                         loading={loading}
-                        loadingMessage={"Sending..."}
+                        loadingMessage={"Đang gửi..."}
                         type="submit"
                         disabled={loading || isActive}
                     />

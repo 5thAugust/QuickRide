@@ -6,6 +6,7 @@ import {
   SendHorizontal,
 } from "lucide-react";
 import Button from "./Button";
+import { formatCurrency } from "../utils/currency";
 
 function NewRide({
   rideData,
@@ -30,8 +31,8 @@ function NewRide({
     <>
       <div
         className={`${
-          showPanel ? "bottom-0" : "-bottom-[60%]"
-        } transition-all duration-500 absolute bg-white w-full rounded-t-xl p-4 pt-0`}
+          showPanel ? "bottom-0 md:flex md:flex-col" : "-bottom-[60%] md:hidden"
+        } transition-all duration-500 absolute bg-white w-full rounded-t-xl p-4 pt-0 md:top-0 md:bottom-0 md:left-0 md:w-[420px] md:h-full md:rounded-none md:shadow-lg md:border-r md:border-zinc-200 md:overflow-y-auto md:z-10`}
       >
         {/* <div
           onClick={() => {
@@ -64,7 +65,7 @@ function NewRide({
             </div>
 
             <div className="text-right">
-              <h1 className="font-semibold text-lg">₹ {rideData?.fare}</h1>
+              <h1 className="font-semibold text-lg">{formatCurrency(rideData?.fare)}</h1>
               <p className="text-xs text-gray-500 ">
                 {(Number(rideData?.distance?.toFixed(2)) / 1000)?.toFixed(1)} Km
               </p>
@@ -77,7 +78,7 @@ function NewRide({
               <Button
                 type={"link"}
                 path={`/captain/chat/${rideData?._id}`}
-                title={"Send a message..."}
+                title={"Nhắn tin..."}
                 icon={<SendHorizontal strokeWidth={1.5} size={18} />}
                 classes={"bg-zinc-100 font-medium text-sm text-zinc-950"}
               />
@@ -148,9 +149,9 @@ function NewRide({
               <CreditCard size={18} />
               <div>
                 <h1 className="text-lg font-semibold leading-6">
-                  ₹ {rideData.fare}
+                  {formatCurrency(rideData.fare)}
                 </h1>
-                <p className="text-xs text-gray-800 ">Cash</p>
+                <p className="text-xs text-gray-800 ">Tiền mặt</p>
               </div>
             </div>
           </div>
@@ -158,12 +159,12 @@ function NewRide({
           {showBtn == "accept" ? (
             <div className="flex gap-2">
               <Button
-                title={"Ignore"}
+                title={"Bỏ qua"}
                 loading={loading}
                 fun={ignoreRide}
                 classes={"bg-white text-zinc-900 border-2 border-black"}
               />
-              <Button title={"Accept"} fun={acceptRide} loading={loading} />
+              <Button title={"Chấp nhận"} fun={acceptRide} loading={loading} />
             </div>
           ) : showBtn == "otp" ? (
             <>
@@ -173,17 +174,17 @@ function NewRide({
                 maxLength={6}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                placeholder={"Enter OTP"}
+                placeholder={"Nhập mã OTP"}
                 className="w-full bg-zinc-100 px-4 py-3 rounded-lg outline-none text-sm mb-2"
               />
               {error && (
                 <p className="text-red-500 text-xs mb-2 text-center">{error}</p>
               )}
-              <Button title={"Verify OTP"} loading={loading} fun={verifyOTP} />{" "}
+              <Button title={"Xác minh OTP"} loading={loading} fun={verifyOTP} />{" "}
             </>
           ) : (
             <Button
-              title={"End Ride"}
+              title={"Kết thúc chuyến"}
               fun={endRide}
               loading={loading}
               classes={"bg-green-600 "}

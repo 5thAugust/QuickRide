@@ -32,9 +32,9 @@ function GetStarted() {
         className="flex flex-col bg-white p-4 pb-8 gap-8 rounded-t-lg
       "
       >
-        <h1 className="text-2xl font-semibold">Get started with QuickRide</h1>
+        <h1 className="text-2xl font-semibold">Bắt đầu với QuickRide</h1>
         <Button
-          title={"Continue"}
+          title={"Tiếp tục"}
           path={"/login"}
           type={"link"}
           icon={<ArrowRight />}

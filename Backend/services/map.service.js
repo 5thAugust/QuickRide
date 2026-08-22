@@ -1,8 +1,23 @@
 const axios = require("axios");
 const captainModel = require("../models/captain.model");
 
+// Hanoi Hoan Kiem Lake, used to center mocked coordinates when no API key is configured
+const MOCK_CENTER = { ltd: 21.0285, lng: 105.8542 };
+
 module.exports.getAddressCoordinate = async (address) => {
   const apiKey = process.env.GOOGLE_MAPS_API;
+
+  if (!apiKey) {
+    console.warn(
+      "[map.service] GOOGLE_MAPS_API not set — returning mocked coordinates for:",
+      address
+    );
+    return {
+      ltd: MOCK_CENTER.ltd + (Math.random() - 0.5) * 0.05,
+      lng: MOCK_CENTER.lng + (Math.random() - 0.5) * 0.05,
+    };
+  }
+
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
     address
   )}&key=${apiKey}`;
@@ -29,6 +44,21 @@ module.exports.getDistanceTime = async (origin, destination) => {
     throw new Error("Origin and destination are required");
   }
   const apiKey = process.env.GOOGLE_MAPS_API;
+
+  if (!apiKey) {
+    console.warn(
+      "[map.service] GOOGLE_MAPS_API not set — returning mocked distance/time for:",
+      origin,
+      "->",
+      destination
+    );
+    const distanceKm = Math.round((2 + Math.random() * 13) * 10) / 10; // 2–15 km
+    const durationMin = Math.round(distanceKm * (2 + Math.random() * 1.5)); // ~2-3.5 min/km
+    return {
+      distance: { value: Math.round(distanceKm * 1000), text: `${distanceKm} km` },
+      duration: { value: durationMin * 60, text: `${durationMin} mins` },
+    };
+  }
 
   const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(
     origin
@@ -57,6 +87,19 @@ module.exports.getAutoCompleteSuggestions = async (input) => {
   }
 
   const apiKey = process.env.GOOGLE_MAPS_API;
+
+  if (!apiKey) {
+    console.warn(
+      "[map.service] GOOGLE_MAPS_API not set — returning mocked suggestions for:",
+      input
+    );
+    return [
+      `${input}, Hoan Kiem, Ha Noi`,
+      `${input}, Ba Dinh, Ha Noi`,
+      `${input}, Dong Da, Ha Noi`,
+    ];
+  }
+
   const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
     input
   )}&key=${apiKey}`;

@@ -82,7 +82,7 @@ module.exports.loginCaptain = asyncHandler(async (req, res) => {
 
   const captain = await captainModel.findOne({ email }).select("+password");
   if (!captain) {
-    res.status(404).json({ message: "Invalid email or password" });
+    return res.status(404).json({ message: "Invalid email or password" });
   }
 
   const isMatch = await captain.comparePassword(password);

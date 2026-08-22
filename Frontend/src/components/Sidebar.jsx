@@ -45,7 +45,7 @@ function Sidebar() {
   return (
     <>
       <div
-        className="m-3 mt-4 absolute right-0 top-0 z-20 cursor-pointer bg-white p-1 rounded"
+        className="m-3 mt-4 absolute right-0 top-0 z-30 cursor-pointer bg-white p-1 rounded"
         onClick={() => {
           setShowSidebar(!showSidebar);
         }}
@@ -55,11 +55,11 @@ function Sidebar() {
 
       {/* Sidebar Component */}
       <div
-        className={`${showSidebar ? " left-0 " : " -left-[100%] "
-          } z-10 duration-300 absolute w-full h-dvh bottom-0 bg-white p-4 pt-5 flex flex-col justify-between`}
+        className={`${showSidebar ? " left-0 " : " -left-[100%] md:-left-[420px] "
+          } z-20 duration-300 absolute w-full md:w-[420px] h-dvh bottom-0 bg-white p-4 pt-5 flex flex-col justify-between md:shadow-2xl md:border-r md:border-zinc-200`}
       >
         <div className="select-none">
-          <h1 className="relative text-2xl font-semibold ">Profile</h1>
+          <h1 className="relative text-2xl font-semibold ">Hồ sơ</h1>
 
           <div className="leading-3 mt-8 mb-4">
             <div className="my-2 rounded-full w-24 h-24 bg-blue-400 mx-auto flex items-center justify-center">
@@ -82,7 +82,7 @@ function Sidebar() {
             className="flex items-center justify-between py-4 cursor-pointer hover:bg-zinc-100 rounded-xl px-3"
           >
             <div className="flex gap-3">
-              <CircleUserRound /> <h1>Edit Profile</h1>
+              <CircleUserRound /> <h1>Chỉnh sửa hồ sơ</h1>
             </div>
             <div>
               <ChevronRight />
@@ -94,7 +94,7 @@ function Sidebar() {
             className="flex items-center justify-between py-4 cursor-pointer hover:bg-zinc-100 rounded-xl px-3"
           >
             <div className="flex gap-3">
-              <History /> <h1>Ride History</h1>
+              <History /> <h1>Lịch sử chuyến đi</h1>
             </div>
             <div>
               <ChevronRight />
@@ -106,7 +106,7 @@ function Sidebar() {
             className="flex items-center justify-between py-4 cursor-pointer hover:bg-zinc-100 rounded-xl px-3"
           >
             <div className="flex gap-3">
-              <KeyRound /> <h1>Change Password</h1>
+              <KeyRound /> <h1>Đổi mật khẩu</h1>
             </div>
             <div>
               <ChevronRight />
@@ -114,7 +114,7 @@ function Sidebar() {
           </Link>
         </div>
 
-        <Button title={"Logout"} classes={"bg-red-600"} fun={logout} />
+        <Button title={"Đăng xuất"} classes={"bg-red-600"} fun={logout} />
       </div>
     </>
   );

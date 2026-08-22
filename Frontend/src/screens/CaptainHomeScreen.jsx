@@ -6,6 +6,7 @@ import { Phone, User } from "lucide-react";
 import { SocketDataContext } from "../contexts/SocketContext";
 import { NewRide, Sidebar } from "../components";
 import Console from "../utils/console";
+import { formatCurrency } from "../utils/currency";
 import { useAlert } from "../hooks/useAlert";
 import { Alert } from "../components";
 
@@ -95,7 +96,7 @@ function CaptainHomeScreen() {
       }
     } catch (error) {
       setLoading(false);
-      showAlert('Some error occured', error.response.data.message, 'failure');
+      showAlert('Đã xảy ra lỗi', error.response.data.message, 'failure');
       Console.log(error.response);
       setTimeout(() => {
         clearRideData();
@@ -124,7 +125,7 @@ function CaptainHomeScreen() {
       }
     } catch (err) {
       setLoading(false);
-      setError("Invalid OTP");
+      setError("Mã OTP không hợp lệ");
       Console.log(err);
     }
   };
@@ -327,7 +328,7 @@ function CaptainHomeScreen() {
 
   return (
     <div
-      className="relative w-full h-dvh bg-contain"
+      className="relative w-full h-dvh bg-contain bg-no-repeat"
       style={{ backgroundImage: `url(${map})` }}
     >
       <Alert
@@ -340,14 +341,14 @@ function CaptainHomeScreen() {
       <Sidebar />
       <iframe
         src={mapLocation}
-        className="map w-full h-[80vh]"
+        className="map w-full h-[80vh] md:absolute md:top-0 md:bottom-0 md:left-[420px] md:w-[calc(100%_-_420px)] md:h-full"
         allowFullScreen={true}
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
       ></iframe>
 
       {showCaptainDetailsPanel && (
-        <div className="absolute bottom-0 flex flex-col justify-start p-4 gap-2 rounded-t-lg bg-white h-fit w-full">
+        <div className="absolute bottom-0 flex flex-col justify-start p-4 gap-2 rounded-t-lg bg-white h-fit w-full md:top-0 md:left-0 md:w-[420px] md:h-full md:rounded-none md:shadow-lg md:border-r md:border-zinc-200 md:overflow-y-auto md:z-10">
           {/* Driver details */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -370,8 +371,8 @@ function CaptainHomeScreen() {
             </div>
 
             <div className="text-right">
-              <p className="text-xs text-gray-500 ">Earnings</p>
-              <h1 className="font-semibold">₹ {earnings.today}</h1>
+              <p className="text-xs text-gray-500 ">Thu nhập</p>
+              <h1 className="font-semibold">{formatCurrency(earnings.today)}</h1>
             </div>
           </div>
 
@@ -380,9 +381,9 @@ function CaptainHomeScreen() {
             <div className="flex flex-col items-center text-white">
               <h1 className="mb-1 text-xl">{rides?.accepted}</h1>
               <p className="text-xs text-gray-400 text-center leading-3">
-                Rides
+                Chuyến
                 <br />
-                Accepted
+                đã nhận
               </p>
             </div>
             <div className="flex flex-col items-center text-white">
@@ -390,15 +391,15 @@ function CaptainHomeScreen() {
               <p className="text-xs text-gray-400 text-center leading-3">
                 Km
                 <br />
-                Travelled
+                đã đi
               </p>
             </div>
             <div className="flex flex-col items-center text-white">
               <h1 className="mb-1 text-xl">{rides?.cancelled}</h1>
               <p className="text-xs text-gray-400 text-center leading-3">
-                Rides
+                Chuyến
                 <br />
-                Cancelled
+                đã hủy
               </p>
             </div>
           </div>
@@ -422,7 +423,7 @@ function CaptainHomeScreen() {
                   ? "/car.png"
                   : `/${captain.vehicle.type}.webp`
               }
-              alt="Driver picture"
+              alt="Ảnh tài xế"
             />
           </div>
         </div>

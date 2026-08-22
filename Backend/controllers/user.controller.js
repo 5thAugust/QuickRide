@@ -78,7 +78,7 @@ module.exports.loginUser = asyncHandler(async (req, res) => {
 
   const user = await userModel.findOne({ email }).select("+password");
   if (!user) {
-    res.status(404).json({ message: "Invalid email or password" });
+    return res.status(404).json({ message: "Invalid email or password" });
   }
 
   const isMatch = await user.comparePassword(password);

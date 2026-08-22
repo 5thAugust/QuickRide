@@ -10,7 +10,7 @@ router.post('/create',
     authMiddleware.authUser,
     body('pickup').isString().isLength({ min: 3 }).withMessage('Invalid pickup address'),
     body('destination').isString().isLength({ min: 3 }).withMessage('Invalid destination address'),
-    body('vehicleType').isString().isIn([ 'auto', 'car', 'bike' ]).withMessage('Invalid vehicle type'),
+    body('vehicleType').isString().isIn([ 'car', 'bike' ]).withMessage('Invalid vehicle type'),
     rideController.createRide
 )
 

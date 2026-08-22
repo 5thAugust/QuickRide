@@ -7,6 +7,7 @@ import {
   CreditCard
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { formatCurrency } from "../utils/currency";
 
 function RideHistory() {
   const navigation = useNavigate();
@@ -60,7 +61,7 @@ function RideHistory() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 md:max-w-2xl md:mx-auto md:my-12 md:rounded-2xl md:shadow-xl md:border md:border-zinc-100 md:p-8">
       <div className="flex gap-3">
         <ArrowLeft
           strokeWidth={3}
@@ -68,13 +69,13 @@ function RideHistory() {
           onClick={() => navigation(-1)}
         />
         {/* <Heading title={"Edit Profile"} /> */}
-        <h1 className="text-2xl font-semibold mb-4">History</h1>
+        <h1 className="text-2xl font-semibold mb-4">Lịch sử</h1>
       </div>
 
-      <div className="h-[90vh] overflow-scroll ">
+      <div className="h-[90vh] overflow-scroll md:h-auto md:max-h-[65vh]">
         <details open className="group">
           <summary className="flex items-center justify-between cursor-pointer text-gray-800 font-semibold mb-2 select-none">
-            <span>Today</span>
+            <span>Hôm nay</span>
             <ChevronUp className="w-5 h-5 transition-transform duration-300 group-open:rotate-180 text-gray-600" />
           </summary>
           {classifyAndSortRides(user.rides).today.length > 0 ? (
@@ -83,14 +84,14 @@ function RideHistory() {
             })
           ) : (
             <h1 className="text-sm text-center text-zinc-600">
-              No rides found
+              Không tìm thấy chuyến đi nào
             </h1>
           )}
         </details>
 
         <details open className="group">
           <summary className="flex items-center justify-between cursor-pointer text-gray-800 font-semibold mb-2 select-none">
-            <span>Yesterday</span>
+            <span>Hôm qua</span>
             <ChevronUp className="w-5 h-5 transition-transform duration-300 group-open:rotate-180 text-gray-600" />
           </summary>
           {classifyAndSortRides(user.rides).yesterday.length > 0 ? (
@@ -99,14 +100,14 @@ function RideHistory() {
             })
           ) : (
             <h1 className="text-sm text-center text-zinc-600">
-              No rides found
+              Không tìm thấy chuyến đi nào
             </h1>
           )}
         </details>
 
         <details open className="group">
           <summary className="flex items-center justify-between cursor-pointer text-gray-800 font-semibold mb-2 select-none">
-            <span>Earlier</span>
+            <span>Trước đó</span>
             <ChevronUp className="w-5 h-5 transition-transform duration-300 group-open:rotate-180 text-gray-600" />
           </summary>
           {classifyAndSortRides(user.rides).earlier.length > 0 ? (
@@ -115,7 +116,7 @@ function RideHistory() {
             })
           ) : (
             <h1 className="text-sm text-center text-zinc-600">
-              No rides found
+              Không tìm thấy chuyến đi nào
             </h1>
           )}
         </details>
@@ -128,26 +129,11 @@ export const Ride = ({ ride }) => {
   function formatDate(inputDate) {
     const date = new Date(inputDate);
 
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-
     const day = date.getDate();
-    const month = months[date.getMonth()];
+    const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
-    return `${day} ${month}, ${year}`;
+    return `${day}/${month}/${year}`;
   }
 
   function formatTime(inputDate) {
@@ -157,8 +143,8 @@ export const Ride = ({ ride }) => {
     let hours = date.getHours();
     const minutes = date.getMinutes();
 
-    // Determine AM/PM
-    const period = hours >= 12 ? "PM" : "AM";
+    // Determine SA/CH (Sáng/Chiều)
+    const period = hours >= 12 ? "CH" : "SA";
 
     // Convert hours to 12-hour format
     hours = hours % 12 || 12; // Convert 0 to 12 for midnight
@@ -182,7 +168,7 @@ export const Ride = ({ ride }) => {
           <Clock size={13} className="-mt-[1px]" /> {formatTime(ride.createdAt)}
         </h1>
         <h1 className="text-sm flex gap-1 items-center font-semibold ">
-          <CreditCard size={13} className="-mt-[1px] text-black" />₹ {ride.fare}
+          <CreditCard size={13} className="-mt-[1px] text-black" />{formatCurrency(ride.fare)}
         </h1>
         {/* </div>
         <div className="flex flex-wrap gap-2 justify-around">
@@ -208,7 +194,7 @@ export const Ride = ({ ride }) => {
             <h1 className=" text-xs truncate text-zinc-600 " title={ride.pickup}>{ride.pickup}</h1>
             <div className="flex items-center gap-2">
               <div className="bg-zinc-200 w-full h-[2px]"></div>
-              <h1 className="text-xs text-zinc-500 ">TO</h1>
+              <h1 className="text-xs text-zinc-500 ">ĐẾN</h1>
               <div className="bg-zinc-200 w-full h-[2px]"></div>
             </div>
             <h1 className=" text-xs truncate text-zinc-600 " title={ride.destination}>

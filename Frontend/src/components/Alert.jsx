@@ -28,7 +28,7 @@ export const Alert = ({ heading, text, isVisible, onClose, type }) => {
                 <h1 className='font-semibold text-base'>{heading}</h1>
                 <p className='text-sm font-normal text-zinc-600 mt-4 mb-6 text-pretty'>{text}</p>
                 <Button
-                    title={"Okay"}
+                    title={"Đồng ý"}
                     fun={onClose}
                     classes={type && status[type]}
                 />

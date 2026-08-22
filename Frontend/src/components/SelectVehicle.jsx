@@ -1,29 +1,22 @@
 import { ChevronDown } from "lucide-react";
+import { formatCurrency } from "../utils/currency";
 
 const vehicles = [
   {
     id: 1,
-    name: "Car",
-    description: "Affordable, compact rides",
+    name: "Xe hơi",
+    description: "Xe nhỏ gọn, giá cả phải chăng",
     type: "car",
     image: "car.png",
     price: 193.8,
   },
   {
     id: 2,
-    name: "Bike",
-    description: "Affordable, motorcycle rides",
+    name: "Xe máy",
+    description: "Xe máy giá rẻ",
     type: "bike",
     image: "bike.webp",
     price: 254.7,
-  },
-  {
-    id: 3,
-    name: "Auto",
-    description: "Affordable, auto rides",
-    type: "auto",
-    image: "auto.webp",
-    price: 200.0,
   },
 ];
 
@@ -38,7 +31,7 @@ function SelectVehicle({
   return (
     <>
       <div
-        className={`${showPanel ? "bottom-0" : "-bottom-[60%]"} transition-all duration-500 absolute  bg-white w-full rounded-t-xl p-4 pt-0`}
+        className={`${showPanel ? "bottom-0 md:flex md:flex-col" : "-bottom-[60%] md:hidden"} transition-all duration-500 absolute  bg-white w-full rounded-t-xl p-4 pt-0 md:top-0 md:bottom-0 md:left-0 md:w-[420px] md:h-full md:rounded-none md:shadow-lg md:border-r md:border-zinc-200 md:overflow-y-auto md:z-10`}
       >
         <div
           onClick={() => {
@@ -92,7 +85,7 @@ const Vehicle = ({
         <p className="text-xs text-gray-800 ">{vehicle.description}</p>
       </div>
       <div className="h-12 w-24">
-        <h3 className="font-semibold">₹ {fare[vehicle.type]}</h3>
+        <h3 className="font-semibold">{formatCurrency(fare[vehicle.type])}</h3>
       </div>
     </div>
   );

@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: quickride-backend
+    runtime: node
+    rootDir: Backend
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SERVER_URL
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: MONGODB_PROD_URL
+        sync: false
+      - key: GOOGLE_MAPS_API
+        sync: false
+      - key: MAIL_USER
+        sync: false
+      - key: MAIL_PASS
+        sync: false
+
+  - type: web
+    name: quickride-frontend
+    runtime: static
+    rootDir: Frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_ENVIRONMENT
+        value: production
+      - key: VITE_RIDE_TIMEOUT
+        value: 90000
+      - key: VITE_SERVER_URL
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

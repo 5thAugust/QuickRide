@@ -64,28 +64,28 @@ function CaptainSignup() {
   }, [responseError]);
 
   return (
-    <div className="w-full h-dvh flex flex-col justify-between p-4 pt-6">
+    <div className="w-full h-dvh flex flex-col justify-between p-4 pt-6 md:h-auto md:max-w-md md:mx-auto md:my-12 md:rounded-2xl md:shadow-xl md:border md:border-zinc-100 md:p-8 md:justify-start md:gap-6">
       <div>
-        <Heading title={"Captain Sign Up🚕"} />
+        <Heading title={"Đăng ký Tài xế🚕"} />
         <form onSubmit={handleSubmit(signupCaptain)}>
           {!showVehiclePanel && (
             <>
               <div className="flex gap-4 -mb-2">
                 <Input
-                  label={"First name"}
+                  label={"Tên"}
                   name={"firstname"}
                   register={register}
                   error={errors.firstname}
                 />
                 <Input
-                  label={"Last name"}
+                  label={"Họ"}
                   name={"lastname"}
                   register={register}
                   error={errors.lastname}
                 />
               </div>
               <Input
-                label={"Phone Number"}
+                label={"Số điện thoại"}
                 type={"number"}
                 name={"phone"}
                 register={register}
@@ -100,7 +100,7 @@ function CaptainSignup() {
               />
 
               <Input
-                label={"Password"}
+                label={"Mật khẩu"}
                 type={"password"}
                 name={"password"}
                 register={register}
@@ -117,7 +117,7 @@ function CaptainSignup() {
                   setShowVehiclePanel(true);
                 }}
               >
-                Next <ChevronRight strokeWidth={2.5} />
+                Tiếp theo <ChevronRight strokeWidth={2.5} />
               </div>
             </>
           )}
@@ -131,13 +131,13 @@ function CaptainSignup() {
               />
               <div className="flex gap-4 -my-2">
                 <Input
-                  label={"Vehicle colour"}
+                  label={"Màu xe"}
                   name={"color"}
                   register={register}
                   error={errors.color}
                 />
                 <Input
-                  label={"Vehicle capacity"}
+                  label={"Số chỗ ngồi"}
                   type={"number"}
                   name={"capacity"}
                   register={register}
@@ -145,15 +145,18 @@ function CaptainSignup() {
                 />
               </div>
               <Input
-                label={"Vehicle number"}
+                label={"Biển số xe"}
                 name={"number"}
                 register={register}
                 error={errors.number}
               />
               <Input
-                label={"Vehicle type"}
+                label={"Loại xe"}
                 type={"select"}
-                options={["Car", "Bike", "Auto"]}
+                options={[
+                  { value: "car", label: "Xe hơi" },
+                  { value: "bike", label: "Xe máy" },
+                ]}
                 name={"type"}
                 register={register}
                 error={errors.type}
@@ -164,14 +167,14 @@ function CaptainSignup() {
                   {responseError}
                 </p>
               )}
-              <Button title={"Sign Up"} loading={loading} type="submit" />
+              <Button title={"Đăng ký"} loading={loading} type="submit" />
             </>
           )}
         </form>
         <p className="text-sm font-normal text-center mt-4">
-          Already have an account?{" "}
+          Đã có tài khoản?{" "}
           <Link to={"/captain/login"} className="font-semibold">
-            Login
+            Đăng nhập
           </Link>
         </p>
       </div>
@@ -179,14 +182,14 @@ function CaptainSignup() {
         <Button
           type={"link"}
           path={"/signup"}
-          title={"Sign Up as User"}
+          title={"Đăng ký với vai trò Người dùng"}
           classes={"bg-green-500"}
         />
         <p className="text-xs font-normal text-center self-end mt-6">
-          This site is protected by reCAPTCHA and the Google{" "}
-          <span className="font-semibold underline">Privacy Policy</span> and{" "}
-          <span className="font-semibold underline">Terms of Service</span>{" "}
-          apply.
+          Trang này được bảo vệ bởi reCAPTCHA và áp dụng{" "}
+          <span className="font-semibold underline">Chính sách quyền riêng tư</span> và{" "}
+          <span className="font-semibold underline">Điều khoản dịch vụ</span>{" "}
+          của Google.
         </p>
       </div>
     </div>

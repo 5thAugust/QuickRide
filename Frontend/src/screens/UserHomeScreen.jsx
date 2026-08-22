@@ -31,7 +31,6 @@ function UserHomeScreen() {
   const [destinationLocation, setDestinationLocation] = useState("");
   const [selectedVehicle, setSelectedVehicle] = useState("car");
   const [fare, setFare] = useState({
-    auto: 0,
     car: 0,
     bike: 0,
   });
@@ -193,7 +192,6 @@ function UserHomeScreen() {
     setDestinationLocation("");
     setSelectedVehicle("car");
     setFare({
-      auto: 0,
       car: 0,
       bike: 0,
     });
@@ -355,21 +353,21 @@ function UserHomeScreen() {
 
   return (
     <div
-      className="relative w-full h-dvh bg-contain"
+      className="relative w-full h-dvh bg-contain bg-no-repeat"
       style={{ backgroundImage: `url(${map})` }}
     >
       <Sidebar />
       <iframe
         src={mapLocation}
-        className="absolute map w-full h-[120vh]"
+        className="absolute map w-full h-[120vh] md:top-0 md:bottom-0 md:left-[420px] md:w-[calc(100%_-_420px)] md:h-full"
         allowFullScreen={true}
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
       ></iframe>
       {/* Find a trip component */}
       {showFindTripPanel && (
-        <div className="absolute b-0 flex flex-col justify-start p-4 pb-2 gap-4 rounded-b-lg bg-white h-fit w-full">
-          <h1 className="text-2xl font-semibold">Find a trip</h1>
+        <div className="absolute b-0 flex flex-col justify-start p-4 pb-2 gap-4 rounded-b-lg bg-white h-fit w-full md:top-0 md:bottom-0 md:left-0 md:w-[420px] md:h-full md:rounded-none md:shadow-lg md:border-r md:border-zinc-200 md:overflow-y-auto md:z-10">
+          <h1 className="text-2xl font-semibold">Tìm chuyến đi</h1>
           <div className="flex items-center relative w-full h-fit">
             <div className="h-3/5 w-[3px] flex flex-col items-center justify-between bg-black rounded-full absolute mx-5">
               <div className="w-2 h-2 rounded-full border-[3px]  bg-white border-black"></div>
@@ -378,7 +376,7 @@ function UserHomeScreen() {
             <div>
               <input
                 id="pickup"
-                placeholder="Add a pick-up location"
+                placeholder="Thêm điểm đón"
                 className="w-full bg-zinc-100 pl-10 pr-4 py-3 rounded-lg outline-black text-sm mb-2 truncate"
                 value={pickupLocation}
                 onChange={onChangeHandler}
@@ -386,7 +384,7 @@ function UserHomeScreen() {
               />
               <input
                 id="destination"
-                placeholder="Add a drop-off location"
+                placeholder="Thêm điểm đến"
                 className="w-full bg-zinc-100 pl-10 pr-4 py-3 rounded-lg outline-black text-sm truncate"
                 value={destinationLocation}
                 onChange={onChangeHandler}
@@ -396,7 +394,7 @@ function UserHomeScreen() {
           </div>
           {pickupLocation.length > 2 && destinationLocation.length > 2 && (
             <Button
-              title={"Search"}
+              title={"Tìm kiếm"}
               loading={loading}
               fun={() => {
                 getDistanceAndFare(pickupLocation, destinationLocation);

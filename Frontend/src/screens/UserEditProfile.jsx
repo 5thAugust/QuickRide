@@ -46,13 +46,13 @@ function UserEditProfile() {
         }
       );
       Console.log(response);
-      showAlert('Edit Successful', 'Your profile details has been successfully updated', 'success');
+      showAlert('Chỉnh sửa thành công', 'Thông tin hồ sơ của bạn đã được cập nhật thành công', 'success');
 
       setTimeout(() => {
         navigation("/home");
       }, 5000)
     } catch (error) {
-      showAlert('Some Error occured', error.response.data[0].msg, 'failure');
+      showAlert('Đã xảy ra lỗi', error.response.data[0].msg, 'failure');
 
       Console.log(error.response);
     } finally {
@@ -66,7 +66,7 @@ function UserEditProfile() {
     }, 5000);
   }, [responseError]);
   return (
-    <div className="w-full h-dvh flex flex-col justify-between p-4 pt-6">
+    <div className="w-full h-dvh flex flex-col justify-between p-4 pt-6 md:h-auto md:max-w-md md:mx-auto md:my-12 md:rounded-2xl md:shadow-xl md:border md:border-zinc-100 md:p-8 md:justify-start md:gap-6">
       <Alert
         heading={alert.heading}
         text={alert.text}
@@ -81,7 +81,7 @@ function UserEditProfile() {
             className="mt-[5px] cursor-pointer"
             onClick={() => navigation(-1)}
           />
-          <Heading title={"Edit Profile"} />
+          <Heading title={"Chỉnh sửa hồ sơ"} />
         </div>
         <Input
           label={"Email"}
@@ -94,21 +94,21 @@ function UserEditProfile() {
         />
         <form onSubmit={handleSubmit(updateUserProfile)}>
           <Input
-            label={"First name"}
+            label={"Tên"}
             name={"firstname"}
             register={register}
             error={errors.firstname}
             defaultValue={user.fullname.firstname}
           />
           <Input
-            label={"Last name"}
+            label={"Họ"}
             name={"lastname"}
             register={register}
             error={errors.lastname}
             defaultValue={user.fullname.lastname}
           />
           <Input
-            label={"Phone Number"}
+            label={"Số điện thoại"}
             type={"number"}
             name={"phone"}
             register={register}
@@ -121,7 +121,7 @@ function UserEditProfile() {
             </p>
           )}
           <Button
-            title={"Update Profile"}
+            title={"Cập nhật hồ sơ"}
             loading={loading}
             type="submit"
             classes={"mt-4"}

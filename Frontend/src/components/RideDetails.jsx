@@ -6,6 +6,7 @@ import {
   SendHorizontal,
 } from "lucide-react";
 import Button from "./Button";
+import { formatCurrency } from "../utils/currency";
 
 function RideDetails({
   pickupLocation,
@@ -25,13 +26,13 @@ function RideDetails({
     <>
       <div
         className={`${
-          showPanel ? "bottom-0" : "-bottom-[60%]"
-        } transition-all duration-500 absolute bg-white w-full rounded-t-xl p-4 pt-2`}
+          showPanel ? "bottom-0 md:flex md:flex-col" : "-bottom-[60%] md:hidden"
+        } transition-all duration-500 absolute bg-white w-full rounded-t-xl p-4 pt-2 md:top-0 md:bottom-0 md:left-0 md:w-[420px] md:h-full md:rounded-none md:shadow-lg md:border-r md:border-zinc-200 md:overflow-y-auto md:z-10`}
       >
         <div>
           {rideCreated && !confirmedRideData && (
             <>
-              <h1 className="text-center">Looking for nearby drivers</h1>
+              <h1 className="text-center">Đang tìm tài xế gần bạn</h1>
               <div className="overflow-y-hidden py-2 pb-2">
                 <div className="h-1 rounded-full bg-blue-500 animate-ping"></div>
               </div>
@@ -78,7 +79,7 @@ function RideDetails({
               <Button
                 type={"link"}
                 path={`/user/chat/${confirmedRideData?._id}`}
-                title={"Send a message..."}
+                title={"Nhắn tin..."}
                 icon={<SendHorizontal strokeWidth={1.5} size={18} />}
                 classes={"bg-zinc-100 font-medium text-sm text-zinc-950"}
               />
@@ -148,21 +149,21 @@ function RideDetails({
               <CreditCard size={18} />
               <div>
                 <h1 className="text-lg font-semibold leading-6">
-                  ₹ {fare[selectedVehicle]}
+                  {formatCurrency(fare[selectedVehicle])}
                 </h1>
-                <p className="text-xs text-gray-800 ">Cash</p>
+                <p className="text-xs text-gray-800 ">Tiền mặt</p>
               </div>
             </div>
           </div>
           {rideCreated || confirmedRideData ? (
             <Button
-              title={"Cancel Ride"}
+              title={"Hủy chuyến"}
               loading={loading}
               classes={"bg-red-600 "}
               fun={cancelRide}
             />
           ) : (
-            <Button title={"Confirm Ride"} fun={createRide} loading={loading} />
+            <Button title={"Xác nhận chuyến"} fun={createRide} loading={loading} />
           )}
         </div>
       </div>
