@@ -12,8 +12,8 @@ mongoose
   .then(() => {
     console.log("Connected to Mongo DB", MONGO_DB[environment].type);
   })
-  .catch(() => {
-    console.log("Failed to connect to MongoDB");
+  .catch((err) => {
+    console.log("Failed to connect to MongoDB:", err.message);
   });
 
 module.exports = mongoose.connection;
