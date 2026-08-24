@@ -64,8 +64,8 @@ function Sidebar() {
           <div className="leading-3 mt-8 mb-4">
             <div className="my-2 rounded-full w-24 h-24 bg-blue-400 mx-auto flex items-center justify-center">
               <h1 className="text-5xl text-white">
-                {newUser?.data?.fullname?.firstname[0]}
-                {newUser?.data?.fullname?.lastname[0]}
+                {newUser?.data?.fullname?.firstname?.[0]}
+                {newUser?.data?.fullname?.lastname?.[0]}
               </h1>
             </div>
             <h1 className=" text-center font-semibold text-2xl">

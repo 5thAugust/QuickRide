@@ -387,8 +387,8 @@ function CaptainHomeScreen() {
             <div className="flex items-center gap-3">
               <div className="my-2 select-none rounded-full w-10 h-10 bg-blue-400 mx-auto flex items-center justify-center">
                 <h1 className="text-lg text-white">
-                  {captain?.fullname?.firstname[0]}
-                  {captain?.fullname?.lastname[0]}
+                  {captain?.fullname?.firstname?.[0]}
+                  {captain?.fullname?.lastname?.[0]}
                 </h1>
               </div>
 

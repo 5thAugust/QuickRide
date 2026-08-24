@@ -108,8 +108,8 @@ function ChatScreen() {
           />
           <div className="select-none rounded-full w-10 h-10 bg-blue-600 flex items-center justify-center">
             <h1 className="text-lg font-semibold text-white">
-              {userData?.fullname?.firstname[0]}
-              {userData?.fullname?.lastname[0]}
+              {userData?.fullname?.firstname?.[0]}
+              {userData?.fullname?.lastname?.[0]}
             </h1>
           </div>
 
