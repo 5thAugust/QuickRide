@@ -4,6 +4,7 @@ const mapService = require("../services/map.service");
 const { sendMessageToSocketId } = require("../socket");
 const rideModel = require("../models/ride.model");
 const userModel = require("../models/user.model");
+const superappWebhookService = require("../services/superappWebhook.service");
 
 module.exports.chatDetails = async (req, res) => {
   const { id } = req.params;
@@ -144,6 +145,12 @@ module.exports.confirmRide = async (req, res) => {
       data: ride,
     });
 
+    superappWebhookService.notifyRideStatus({
+      rideId: ride._id,
+      status: "CONFIRMED",
+      captain: ride.captain,
+    });
+
     // TODO: Remove ride from other captains
     // Implement logic here, maybe emit an event or update captain listings
 
@@ -172,6 +179,12 @@ module.exports.startRide = async (req, res) => {
       data: ride,
     });
 
+    superappWebhookService.notifyRideStatus({
+      rideId: ride._id,
+      status: "IN_PROGRESS",
+      captain: ride.captain,
+    });
+
     return res.status(200).json(ride);
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -192,6 +205,12 @@ module.exports.endRide = async (req, res) => {
     sendMessageToSocketId(ride.user.socketId, {
       event: "ride-ended",
       data: ride,
+    });
+
+    superappWebhookService.notifyRideStatus({
+      rideId: ride._id,
+      status: "COMPLETED",
+      captain: ride.captain,
     });
 
     return res.status(200).json(ride);
@@ -231,6 +250,13 @@ module.exports.cancelRide = async (req, res) => {
         data: ride,
       });
     });
+
+    superappWebhookService.notifyRideStatus({
+      rideId: ride._id,
+      status: "CANCELLED",
+      captain: ride.captain,
+    });
+
     return res.status(200).json(ride);
   } catch (err) {
     return res.status(500).json({ message: err.message });

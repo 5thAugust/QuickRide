@@ -3,8 +3,7 @@ const { validationResult } = require("express-validator");
 const rideModel = require("../models/ride.model");
 const rideService = require("../services/ride.service");
 const userService = require("../services/user.service");
-
-const BOOKING_PREFIX = "RIDE-";
+const { toBookingId, toRideId } = require("../utils/bookingId");
 
 const STATUS_MAP = {
   pending: "searching",
@@ -13,16 +12,6 @@ const STATUS_MAP = {
   completed: "completed",
   cancelled: "cancelled",
 };
-
-function toBookingId(rideId) {
-  return `${BOOKING_PREFIX}${rideId}`;
-}
-
-function toRideId(bookingId) {
-  return bookingId.startsWith(BOOKING_PREFIX)
-    ? bookingId.slice(BOOKING_PREFIX.length)
-    : bookingId;
-}
 
 function buildDriver(captain) {
   if (!captain) return null;
