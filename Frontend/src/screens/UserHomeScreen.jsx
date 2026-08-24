@@ -35,6 +35,7 @@ function UserHomeScreen() {
     bike: 0,
   });
   const [confirmedRideData, setConfirmedRideData] = useState(null);
+  const [rideId, setRideId] = useState(null);
   const rideTimeout = useRef(null);
 
   // Panels
@@ -138,6 +139,7 @@ function UserHomeScreen() {
         _id: response.data._id,
       };
       localStorage.setItem("rideDetails", JSON.stringify(rideData));
+      setRideId(response.data._id);
       setLoading(false);
       setRideCreated(true);
 
@@ -157,7 +159,7 @@ function UserHomeScreen() {
     try {
       setLoading(true);
       await axios.get(
-        `${import.meta.env.VITE_SERVER_URL}/ride/cancel?rideId=${rideDetails._id || rideDetails.confirmedRideData._id
+        `${import.meta.env.VITE_SERVER_URL}/ride/cancel?rideId=${rideDetails._id || rideDetails.confirmedRideData?._id
         }`,
         {
           pickup: pickupLocation,
@@ -196,6 +198,7 @@ function UserHomeScreen() {
       bike: 0,
     });
     setConfirmedRideData(null);
+    setRideId(null);
     setRideCreated(false);
   };
 
@@ -317,6 +320,7 @@ function UserHomeScreen() {
       setSelectedVehicle(ride.vehicleType);
       setFare(ride.fare);
       setConfirmedRideData(ride.confirmedRideData);
+      setRideId(ride._id ?? ride.confirmedRideData?._id ?? null);
     }
 
     if (storedPanelDetails) {
@@ -335,6 +339,7 @@ function UserHomeScreen() {
       vehicleType: selectedVehicle,
       fare: fare,
       confirmedRideData: confirmedRideData,
+      _id: rideId,
     };
     localStorage.setItem("rideDetails", JSON.stringify(rideData));
   }, [
@@ -343,6 +348,7 @@ function UserHomeScreen() {
     selectedVehicle,
     fare,
     confirmedRideData,
+    rideId,
   ]);
 
   // Store panel information

@@ -74,7 +74,7 @@ function CaptainHomeScreen() {
 
   const acceptRide = async () => {
     try {
-      if (newRide._id != "") {
+      if (newRide._id) {
         setLoading(true);
         const response = await axios.post(
           `${import.meta.env.VITE_SERVER_URL}/ride/confirm`,
@@ -104,7 +104,7 @@ function CaptainHomeScreen() {
 
   const startRide = async () => {
     try {
-      if (newRide._id != "") {
+      if (newRide._id) {
         setLoading(true);
         const response = await axios.get(
           `${import.meta.env.VITE_SERVER_URL}/ride/start-ride?rideId=${newRide._id}`,
@@ -130,7 +130,7 @@ function CaptainHomeScreen() {
 
   const endRide = async () => {
     try {
-      if (newRide._id != "") {
+      if (newRide._id) {
         setLoading(true);
         await axios.post(
           `${import.meta.env.VITE_SERVER_URL}/ride/end-ride`,
