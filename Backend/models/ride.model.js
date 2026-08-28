@@ -40,6 +40,13 @@ const rideSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // Set once the captain who accepted a scheduled ride has been pinged
+    // ("ride-start-reminder") that it's almost time to head to pickup —
+    // guards against re-notifying them on every background poll tick.
+    scheduledReminderSentAt: {
+      type: Date,
+      default: null,
+    },
     duration: {
       type: Number,
     }, // in seconds

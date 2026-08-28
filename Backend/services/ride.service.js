@@ -3,6 +3,10 @@ const rideModel = require("../models/ride.model");
 const mapService = require("./map.service");
 const { sendMessageToSocketId } = require("../socket");
 
+// How long before a scheduled ride's pickup time to nudge the captain who
+// already accepted it that it's almost time to head over.
+const SCHEDULE_REMINDER_LEAD_MINUTES = Number(process.env.SCHEDULE_REMINDER_LEAD_MINUTES) || 10;
+
 const getFare = async (pickup, destination) => {
   if (!pickup || !destination) {
     throw new Error("Pickup and destination are required");
@@ -71,6 +75,41 @@ module.exports.createRide = async ({
     return ride;
   } catch (error) {
     throw new Error("Error occured while creating ride.");
+  }
+};
+
+// Polled periodically (see server.js) to notify the captain who already
+// accepted a scheduled ride ("đặt xe theo giờ") that it's almost time to
+// start — scheduledFor by itself is just a label shown in the UI; this is
+// what actually prompts the captain to act on it, once per ride
+// (scheduledReminderSentAt guards against re-sending on every poll tick).
+module.exports.sendScheduledStartReminders = async () => {
+  const reminderThreshold = new Date(Date.now() + SCHEDULE_REMINDER_LEAD_MINUTES * 60 * 1000);
+
+  try {
+    const dueRides = await rideModel
+      .find({
+        status: "accepted",
+        scheduledFor: { $ne: null, $lte: reminderThreshold },
+        scheduledReminderSentAt: null,
+      })
+      .populate("captain")
+      .populate("user");
+
+    for (const ride of dueRides) {
+      if (ride.captain?.socketId) {
+        sendMessageToSocketId(ride.captain.socketId, {
+          event: "ride-start-reminder",
+          data: ride,
+        });
+      }
+      await rideModel.findOneAndUpdate(
+        { _id: ride._id },
+        { scheduledReminderSentAt: new Date() }
+      );
+    }
+  } catch (e) {
+    console.error("Failed to send scheduled ride start reminders:", e.message);
   }
 };
 

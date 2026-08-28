@@ -7,6 +7,7 @@ import { SocketDataContext } from "../contexts/SocketContext";
 import { NewRide, Sidebar } from "../components";
 import Console from "../utils/console";
 import { formatCurrency } from "../utils/currency";
+import { formatScheduledFor } from "../utils/datetime";
 import { useAlert } from "../hooks/useAlert";
 import { Alert } from "../components";
 
@@ -258,13 +259,32 @@ function CaptainHomeScreen() {
       clearRideData();
     };
 
+    // Pushed once, shortly before a scheduled ride's pickup time, to the
+    // captain who already accepted it — brings that ride back to the
+    // foreground with the "Bắt đầu chuyến" button ready, since they may
+    // have accepted it much earlier and moved on to other things.
+    const handleRideStartReminder = (data) => {
+      Console.log("Ride start reminder:", data);
+      setNewRide(data);
+      setShowBtn("start");
+      setShowNewRidePanel(true);
+      setShowCaptainDetailsPanel(false);
+      showAlert(
+        "Sắp đến giờ đón khách",
+        `Chuyến đi lúc ${formatScheduledFor(data.scheduledFor)} sắp bắt đầu. Vui lòng di chuyển đến điểm đón.`,
+        "success"
+      );
+    };
+
     socket.on("new-ride", handleNewRide);
     socket.on("ride-cancelled", handleRideCancelled);
+    socket.on("ride-start-reminder", handleRideStartReminder);
 
     return () => {
       socket.off("connect", joinAsCaptain);
       socket.off("new-ride", handleNewRide);
       socket.off("ride-cancelled", handleRideCancelled);
+      socket.off("ride-start-reminder", handleRideStartReminder);
       if (watchId !== undefined && navigator.geolocation) {
         navigator.geolocation.clearWatch(watchId);
       }
