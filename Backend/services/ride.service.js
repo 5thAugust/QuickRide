@@ -3,13 +3,6 @@ const rideModel = require("../models/ride.model");
 const mapService = require("./map.service");
 const { sendMessageToSocketId } = require("../socket");
 
-// How close to its scheduledFor time a ride must be before we start
-// dispatching to captains. A ride scheduled less than this far out at
-// creation time skips the "scheduled" state entirely and dispatches
-// immediately, so it never sits inert past its own pickup time.
-const DISPATCH_LEAD_MINUTES = Number(process.env.SCHEDULE_DISPATCH_LEAD_MINUTES) || 15;
-module.exports.DISPATCH_LEAD_MINUTES = DISPATCH_LEAD_MINUTES;
-
 const getFare = async (pickup, destination) => {
   if (!pickup || !destination) {
     throw new Error("Pickup and destination are required");
@@ -64,9 +57,6 @@ module.exports.createRide = async ({
   try {
     const { fare, distanceTime } = await getFare(pickup, destination);
 
-    const dispatchThreshold = new Date(Date.now() + DISPATCH_LEAD_MINUTES * 60 * 1000);
-    const isFutureSchedule = scheduledFor && new Date(scheduledFor) > dispatchThreshold;
-
     const ride = rideModel.create({
       user,
       pickup,
@@ -75,39 +65,12 @@ module.exports.createRide = async ({
       vehicle: vehicleType,
       distance: distanceTime.distance.value,
       duration: distanceTime.duration.value,
-      status: isFutureSchedule ? "scheduled" : "pending",
       scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
     });
 
     return ride;
   } catch (error) {
     throw new Error("Error occured while creating ride.");
-  }
-};
-
-// Polled periodically (see server.js) to move rides booked for later into
-// the normal dispatch flow once they're within DISPATCH_LEAD_MINUTES of
-// their scheduledFor time. Reuses notifyNearbyCaptains so a scheduled ride
-// is matched exactly like an immediate one from this point on.
-module.exports.activateScheduledRides = async () => {
-  const dispatchThreshold = new Date(Date.now() + DISPATCH_LEAD_MINUTES * 60 * 1000);
-
-  try {
-    const dueRides = await rideModel.find({
-      status: "scheduled",
-      scheduledFor: { $lte: dispatchThreshold },
-    });
-
-    for (const ride of dueRides) {
-      await rideModel.findOneAndUpdate({ _id: ride._id }, { status: "pending" });
-      module.exports.notifyNearbyCaptains({
-        ride,
-        pickup: ride.pickup,
-        vehicleType: ride.vehicle,
-      });
-    }
-  } catch (e) {
-    console.error("Failed to activate scheduled rides:", e.message);
   }
 };
 

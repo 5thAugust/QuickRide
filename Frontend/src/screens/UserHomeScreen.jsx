@@ -169,9 +169,10 @@ function UserHomeScreen() {
       setLoading(false);
       setRideCreated(true);
 
-      // Scheduled rides aren't dispatched to captains yet, so the
-      // "no captain accepted in time" auto-cancel doesn't apply until
-      // dispatch actually starts near the scheduled pickup time.
+      // Captains are notified immediately even for a scheduled ride, but
+      // it's unreasonable to expect one to commit to a pickup that's hours
+      // or days out within the same 90s window used for "book now" rides —
+      // so skip the auto-cancel for scheduled bookings.
       if (!scheduledForISO) {
         rideTimeout.current = setTimeout(() => {
           cancelRide();

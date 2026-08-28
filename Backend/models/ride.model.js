@@ -29,9 +29,13 @@ const rideSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["scheduled", "pending", "accepted", "ongoing", "completed", "cancelled"],
+      enum: ["pending", "accepted", "ongoing", "completed", "cancelled"],
       default: "pending",
     },
+    // Optional future pickup time for "đặt xe theo giờ" (schedule a ride
+    // for later). Purely informational — the ride is still dispatched to
+    // nearby captains immediately on creation, same as any other ride;
+    // this just tells the captain (and rider) when to actually show up.
     scheduledFor: {
       type: Date,
       default: null,

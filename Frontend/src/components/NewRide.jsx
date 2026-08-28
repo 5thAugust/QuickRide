@@ -1,4 +1,5 @@
 import {
+  Clock,
   CreditCard,
   MapPinMinus,
   MapPinPlus,
@@ -7,6 +8,7 @@ import {
 } from "lucide-react";
 import Button from "./Button";
 import { formatCurrency } from "../utils/currency";
+import { formatScheduledFor } from "../utils/datetime";
 
 function NewRide({
   rideData,
@@ -68,6 +70,13 @@ function NewRide({
               </p>
             </div>
           </div>
+
+          {rideData?.scheduledFor && (
+            <div className="flex items-center justify-center gap-2 text-center py-1.5 mb-2 rounded-lg bg-blue-50 text-sm font-semibold text-blue-600">
+              <Clock size={15} />
+              <h1>Đón khách lúc {formatScheduledFor(rideData.scheduledFor)}</h1>
+            </div>
+          )}
 
           {/* Message and call */}
           {showBtn != "accept" && (

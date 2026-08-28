@@ -35,23 +35,17 @@ function RideDetails({
         <div>
           {rideCreated && !confirmedRideData && (
             <>
-              {scheduledFor ? (
-                <div className="flex items-center justify-center gap-2 text-center py-2">
-                  <Clock size={16} />
-                  <h1>
-                    Đã đặt xe lúc {formatScheduledFor(scheduledFor)} — tài xế
-                    sẽ được tìm gần giờ đón
-                  </h1>
-                </div>
-              ) : (
-                <>
-                  <h1 className="text-center">Đang tìm tài xế gần bạn</h1>
-                  <div className="overflow-y-hidden py-2 pb-2">
-                    <div className="h-1 rounded-full bg-blue-500 animate-ping"></div>
-                  </div>
-                </>
-              )}
+              <h1 className="text-center">Đang tìm tài xế gần bạn</h1>
+              <div className="overflow-y-hidden py-2 pb-2">
+                <div className="h-1 rounded-full bg-blue-500 animate-ping"></div>
+              </div>
             </>
+          )}
+          {scheduledFor && (
+            <div className="flex items-center justify-center gap-2 text-center py-1 mb-1 text-sm font-medium text-blue-600">
+              <Clock size={15} />
+              <h1>Đón lúc {formatScheduledFor(scheduledFor)}</h1>
+            </div>
           )}
           <div
             className={`flex ${

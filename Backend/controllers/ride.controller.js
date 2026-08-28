@@ -66,9 +66,7 @@ module.exports.createRide = async (req, res) => {
 
     res.status(201).json(ride);
 
-    if (ride.status === "pending") {
-      rideService.notifyNearbyCaptains({ ride, pickup, vehicleType });
-    }
+    rideService.notifyNearbyCaptains({ ride, pickup, vehicleType });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
