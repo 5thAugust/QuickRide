@@ -251,6 +251,18 @@ function CaptainHomeScreen() {
       setShowBtn("accept");
       setNewRide(data);
       setShowNewRidePanel(true);
+
+      // Scheduled rides ("đặt xe theo giờ") are broadcast the same instant
+      // they're booked, same as any other ride — so the captain needs to
+      // be told the pickup time right away too, not just have it sit as
+      // text on the panel they may not open right away.
+      if (data.scheduledFor) {
+        showAlert(
+          "Chuyến đặt trước",
+          `Khách vừa đặt một chuyến cho lúc ${formatScheduledFor(data.scheduledFor)}. Nhấn "Chấp nhận" nếu bạn có thể nhận chuyến này.`,
+          "success"
+        );
+      }
     };
 
     const handleRideCancelled = (data) => {
@@ -259,32 +271,13 @@ function CaptainHomeScreen() {
       clearRideData();
     };
 
-    // Pushed once, shortly before a scheduled ride's pickup time, to the
-    // captain who already accepted it — brings that ride back to the
-    // foreground with the "Bắt đầu chuyến" button ready, since they may
-    // have accepted it much earlier and moved on to other things.
-    const handleRideStartReminder = (data) => {
-      Console.log("Ride start reminder:", data);
-      setNewRide(data);
-      setShowBtn("start");
-      setShowNewRidePanel(true);
-      setShowCaptainDetailsPanel(false);
-      showAlert(
-        "Sắp đến giờ đón khách",
-        `Chuyến đi lúc ${formatScheduledFor(data.scheduledFor)} sắp bắt đầu. Vui lòng di chuyển đến điểm đón.`,
-        "success"
-      );
-    };
-
     socket.on("new-ride", handleNewRide);
     socket.on("ride-cancelled", handleRideCancelled);
-    socket.on("ride-start-reminder", handleRideStartReminder);
 
     return () => {
       socket.off("connect", joinAsCaptain);
       socket.off("new-ride", handleNewRide);
       socket.off("ride-cancelled", handleRideCancelled);
-      socket.off("ride-start-reminder", handleRideStartReminder);
       if (watchId !== undefined && navigator.geolocation) {
         navigator.geolocation.clearWatch(watchId);
       }

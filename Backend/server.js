@@ -18,14 +18,8 @@ const rideRoutes = require("./routes/ride.routes");
 const mailRoutes = require("./routes/mail.routes");
 const bookingRoutes = require("./routes/booking.routes");
 const dbStream = require("./services/logging.service");
-const rideService = require("./services/ride.service");
 require("./config/db");
 const PORT = process.env.PORT || 4000;
-
-// Periodically nudge captains who've already accepted a scheduled ride
-// ("đặt xe theo giờ") that it's almost time to head to pickup.
-const SCHEDULE_POLL_INTERVAL_MS = Number(process.env.SCHEDULE_POLL_INTERVAL_MS) || 60000;
-setInterval(() => rideService.sendScheduledStartReminders(), SCHEDULE_POLL_INTERVAL_MS);
 
 if (process.env.ENVIRONMENT == "production") {
   app.use(
