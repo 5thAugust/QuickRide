@@ -108,6 +108,7 @@ module.exports.getBookingStatus = async (req, res) => {
     return res.status(200).json({
       booking_id: rawBookingId,
       status,
+      fare: ride.fare,
       driver,
       message: buildMessage(status, driver),
     });
