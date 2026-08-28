@@ -6,6 +6,7 @@ const userService = require("../services/user.service");
 const { toBookingId, toRideId } = require("../utils/bookingId");
 
 const STATUS_MAP = {
+  scheduled: "scheduled",
   pending: "searching",
   accepted: "accepted",
   ongoing: "ongoing",
@@ -24,6 +25,8 @@ function buildDriver(captain) {
 
 function buildMessage(status, driver) {
   switch (status) {
+    case "scheduled":
+      return "Chuyến của bạn đã được đặt lịch, tài xế sẽ được tìm gần giờ đón.";
     case "searching":
       return "Đang tìm tài xế phù hợp gần bạn...";
     case "accepted":
@@ -47,7 +50,7 @@ module.exports.createBooking = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { pickup, destination, vehicle_type, customer } = req.body;
+  const { pickup, destination, vehicle_type, customer, scheduled_for } = req.body;
 
   try {
     const user = await userService.findOrCreateByEmail({
@@ -63,18 +66,23 @@ module.exports.createBooking = async (req, res) => {
       pickup,
       destination,
       vehicleType: vehicle_type,
+      scheduledFor: scheduled_for,
     });
 
     user.rides.push(ride._id);
     await user.save();
 
+    const status = STATUS_MAP[ride.status] || ride.status;
+
     res.status(201).json({
       booking_id: toBookingId(ride._id),
-      status: "searching",
-      message: buildMessage("searching"),
+      status,
+      message: buildMessage(status),
     });
 
-    rideService.notifyNearbyCaptains({ ride, pickup, vehicleType: vehicle_type });
+    if (ride.status === "pending") {
+      rideService.notifyNearbyCaptains({ ride, pickup, vehicleType: vehicle_type });
+    }
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: err.message || "Không thể tạo chuyến đi." });

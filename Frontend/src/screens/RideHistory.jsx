@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatCurrency } from "../utils/currency";
+import { formatScheduledFor } from "../utils/datetime";
 
 function RideHistory() {
   const navigation = useNavigate();
@@ -170,6 +171,12 @@ export const Ride = ({ ride }) => {
         <h1 className="text-sm flex gap-1 items-center font-semibold ">
           <CreditCard size={13} className="-mt-[1px] text-black" />{formatCurrency(ride.fare)}
         </h1>
+        {ride.scheduledFor && (
+          <h1 className="text-sm flex gap-1 items-center font-semibold text-blue-600">
+            <Clock size={13} className="-mt-[1px]" /> Đón lúc{" "}
+            {formatScheduledFor(ride.scheduledFor)}
+          </h1>
+        )}
         {/* </div>
         <div className="flex flex-wrap gap-2 justify-around">
           <h1 className="text-xs flex gap-1 items-center font-semibold">

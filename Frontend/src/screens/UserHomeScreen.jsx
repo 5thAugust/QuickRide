@@ -12,6 +12,10 @@ import axios from "axios";
 import debounce from "lodash.debounce";
 import { SocketDataContext } from "../contexts/SocketContext";
 import Console from "../utils/console";
+import {
+  scheduleMinDatetimeValue,
+  scheduleMaxDatetimeValue,
+} from "../utils/datetime";
 
 function UserHomeScreen() {
   const token = localStorage.getItem("token"); // this token is in use
@@ -36,6 +40,8 @@ function UserHomeScreen() {
   });
   const [confirmedRideData, setConfirmedRideData] = useState(null);
   const [rideId, setRideId] = useState(null);
+  // "" = đặt ngay; a datetime-local string = đặt theo giờ
+  const [scheduledFor, setScheduledFor] = useState("");
   const rideTimeout = useRef(null);
 
   // Panels
@@ -116,12 +122,16 @@ function UserHomeScreen() {
   const createRide = async () => {
     try {
       setLoading(true);
+      const scheduledForISO = scheduledFor
+        ? new Date(scheduledFor).toISOString()
+        : undefined;
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/ride/create`,
         {
           pickup: pickupLocation,
           destination: destinationLocation,
           vehicleType: selectedVehicle,
+          scheduledFor: scheduledForISO,
         },
         {
           headers: {
@@ -135,6 +145,7 @@ function UserHomeScreen() {
         destination: destinationLocation,
         vehicleType: selectedVehicle,
         fare: fare,
+        scheduledFor: scheduledFor || null,
         confirmedRideData: confirmedRideData,
         _id: response.data._id,
       };
@@ -143,11 +154,14 @@ function UserHomeScreen() {
       setLoading(false);
       setRideCreated(true);
 
-      // Automatically cancel the ride after 1.5 minutes
-      rideTimeout.current = setTimeout(() => {
-        cancelRide();
-      }, import.meta.env.VITE_RIDE_TIMEOUT);
-      
+      // Scheduled rides aren't dispatched to captains yet, so the
+      // "no captain accepted in time" auto-cancel doesn't apply until
+      // dispatch actually starts near the scheduled pickup time.
+      if (!scheduledForISO) {
+        rideTimeout.current = setTimeout(() => {
+          cancelRide();
+        }, import.meta.env.VITE_RIDE_TIMEOUT);
+      }
     } catch (error) {
       Console.log(error);
       setLoading(false);
@@ -200,6 +214,7 @@ function UserHomeScreen() {
     setConfirmedRideData(null);
     setRideId(null);
     setRideCreated(false);
+    setScheduledFor("");
   };
 
   // Update Location
@@ -321,6 +336,7 @@ function UserHomeScreen() {
       setFare(ride.fare);
       setConfirmedRideData(ride.confirmedRideData);
       setRideId(ride._id ?? ride.confirmedRideData?._id ?? null);
+      setScheduledFor(ride.scheduledFor || "");
     }
 
     if (storedPanelDetails) {
@@ -338,6 +354,7 @@ function UserHomeScreen() {
       destination: destinationLocation,
       vehicleType: selectedVehicle,
       fare: fare,
+      scheduledFor: scheduledFor || null,
       confirmedRideData: confirmedRideData,
       _id: rideId,
     };
@@ -347,6 +364,7 @@ function UserHomeScreen() {
     destinationLocation,
     selectedVehicle,
     fare,
+    scheduledFor,
     confirmedRideData,
     rideId,
   ]);
@@ -418,6 +436,44 @@ function UserHomeScreen() {
               />
             </div>
           </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setScheduledFor("")}
+              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+                !scheduledFor
+                  ? "bg-black text-white"
+                  : "bg-zinc-100 text-zinc-600"
+              }`}
+            >
+              Đặt ngay
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setScheduledFor((prev) => prev || scheduleMinDatetimeValue())
+              }
+              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+                scheduledFor
+                  ? "bg-black text-white"
+                  : "bg-zinc-100 text-zinc-600"
+              }`}
+            >
+              Đặt theo giờ
+            </button>
+          </div>
+          {scheduledFor && (
+            <input
+              type="datetime-local"
+              className="w-full bg-zinc-100 px-4 py-3 rounded-lg outline-black text-sm"
+              value={scheduledFor}
+              min={scheduleMinDatetimeValue()}
+              max={scheduleMaxDatetimeValue()}
+              onChange={(e) => setScheduledFor(e.target.value)}
+            />
+          )}
+
           {pickupLocation.length > 2 && destinationLocation.length > 2 && (
             <Button
               title={"Tìm kiếm"}
@@ -458,6 +514,7 @@ function UserHomeScreen() {
         destinationLocation={destinationLocation}
         selectedVehicle={selectedVehicle}
         fare={fare}
+        scheduledFor={scheduledFor}
         showPanel={showRideDetailsPanel}
         setShowPanel={setShowRideDetailsPanel}
         showPreviousPanel={setShowSelectVehiclePanel}

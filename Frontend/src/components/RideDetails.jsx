@@ -1,4 +1,5 @@
 import {
+  Clock,
   CreditCard,
   MapPinMinus,
   MapPinPlus,
@@ -7,12 +8,14 @@ import {
 } from "lucide-react";
 import Button from "./Button";
 import { formatCurrency } from "../utils/currency";
+import { formatScheduledFor } from "../utils/datetime";
 
 function RideDetails({
   pickupLocation,
   destinationLocation,
   selectedVehicle,
   fare,
+  scheduledFor,
   showPanel,
   setShowPanel,
   showPreviousPanel,
@@ -32,10 +35,22 @@ function RideDetails({
         <div>
           {rideCreated && !confirmedRideData && (
             <>
-              <h1 className="text-center">Đang tìm tài xế gần bạn</h1>
-              <div className="overflow-y-hidden py-2 pb-2">
-                <div className="h-1 rounded-full bg-blue-500 animate-ping"></div>
-              </div>
+              {scheduledFor ? (
+                <div className="flex items-center justify-center gap-2 text-center py-2">
+                  <Clock size={16} />
+                  <h1>
+                    Đã đặt xe lúc {formatScheduledFor(scheduledFor)} — tài xế
+                    sẽ được tìm gần giờ đón
+                  </h1>
+                </div>
+              ) : (
+                <>
+                  <h1 className="text-center">Đang tìm tài xế gần bạn</h1>
+                  <div className="overflow-y-hidden py-2 pb-2">
+                    <div className="h-1 rounded-full bg-blue-500 animate-ping"></div>
+                  </div>
+                </>
+              )}
             </>
           )}
           <div

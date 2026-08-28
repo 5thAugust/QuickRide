@@ -47,7 +47,7 @@ module.exports.createRide = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { pickup, destination, vehicleType } = req.body;
+  const { pickup, destination, vehicleType, scheduledFor } = req.body;
 
   try {
     const ride = await rideService.createRide({
@@ -55,6 +55,7 @@ module.exports.createRide = async (req, res) => {
       pickup,
       destination,
       vehicleType,
+      scheduledFor,
     });
 
     const user = await userModel.findOne({ _id: req.user._id });
@@ -65,7 +66,9 @@ module.exports.createRide = async (req, res) => {
 
     res.status(201).json(ride);
 
-    rideService.notifyNearbyCaptains({ ride, pickup, vehicleType });
+    if (ride.status === "pending") {
+      rideService.notifyNearbyCaptains({ ride, pickup, vehicleType });
+    }
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

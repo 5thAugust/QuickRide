@@ -18,8 +18,14 @@ const rideRoutes = require("./routes/ride.routes");
 const mailRoutes = require("./routes/mail.routes");
 const bookingRoutes = require("./routes/booking.routes");
 const dbStream = require("./services/logging.service");
+const rideService = require("./services/ride.service");
 require("./config/db");
 const PORT = process.env.PORT || 4000;
+
+// Periodically move rides booked for later ("đặt xe theo giờ") into the
+// normal dispatch flow once they're close to their scheduled pickup time.
+const SCHEDULE_POLL_INTERVAL_MS = Number(process.env.SCHEDULE_POLL_INTERVAL_MS) || 60000;
+setInterval(() => rideService.activateScheduledRides(), SCHEDULE_POLL_INTERVAL_MS);
 
 if (process.env.ENVIRONMENT == "production") {
   app.use(

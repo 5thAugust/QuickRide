@@ -3,6 +3,7 @@ const router = express.Router();
 const { body } = require("express-validator");
 const bookingController = require("../controllers/booking.controller");
 const { authSuperApp } = require("../middlewares/auth.middleware");
+const { validateScheduledFor } = require("../utils/scheduleValidation");
 
 // Server-to-server contract for a Super App: no cookies/JWT session, no
 // signup screen — the caller has already authenticated the end user and
@@ -16,6 +17,8 @@ router.post(
   body("vehicle_type").isString().isIn(["car", "bike"]).withMessage("Invalid vehicle_type"),
   body("customer.email").isEmail().withMessage("Invalid customer.email"),
   body("customer.username").isString().notEmpty().withMessage("customer.username is required"),
+  body("scheduled_for").optional({ nullable: true }).isISO8601().withMessage("Invalid scheduled_for datetime")
+    .custom(validateScheduledFor),
   bookingController.createBooking
 );
 
