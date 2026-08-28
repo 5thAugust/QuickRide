@@ -15,6 +15,7 @@ import Console from "../utils/console";
 import {
   scheduleMinDatetimeValue,
   scheduleMaxDatetimeValue,
+  MIN_SCHEDULE_LEAD_MINUTES,
 } from "../utils/datetime";
 
 function UserHomeScreen() {
@@ -122,8 +123,22 @@ function UserHomeScreen() {
   const createRide = async () => {
     try {
       setLoading(true);
-      const scheduledForISO = scheduledFor
-        ? new Date(scheduledFor).toISOString()
+      // The datetime picker's value was chosen against an earlier "now" —
+      // filling in pickup/destination, waiting on the fare quote, and
+      // stepping through the panels all take time. If that drift has
+      // pushed the picked time past the server's minimum lead window,
+      // bump it forward instead of letting the request 400.
+      let effectiveScheduledFor = scheduledFor;
+      if (
+        scheduledFor &&
+        new Date(scheduledFor).getTime() <
+          Date.now() + MIN_SCHEDULE_LEAD_MINUTES * 60 * 1000
+      ) {
+        effectiveScheduledFor = scheduleMinDatetimeValue();
+        setScheduledFor(effectiveScheduledFor);
+      }
+      const scheduledForISO = effectiveScheduledFor
+        ? new Date(effectiveScheduledFor).toISOString()
         : undefined;
       const response = await axios.post(
         `${import.meta.env.VITE_SERVER_URL}/ride/create`,
@@ -145,7 +160,7 @@ function UserHomeScreen() {
         destination: destinationLocation,
         vehicleType: selectedVehicle,
         fare: fare,
-        scheduledFor: scheduledFor || null,
+        scheduledFor: effectiveScheduledFor || null,
         confirmedRideData: confirmedRideData,
         _id: response.data._id,
       };
