@@ -33,6 +33,26 @@ module.exports.findOrCreateByEmail = async ({ email, firstName, lastName, phone,
 
   const existingUser = await userModel.findOne({ email });
   if (existingUser) {
+    // Keep the QuickRide profile in sync with whatever the Super App has on
+    // file. Without this, an account created before phone/name were wired
+    // up on the Super App side (or before the caller had them on file yet)
+    // stayed missing those fields forever — this only ran once, at creation.
+    // Never blanks out an existing value with an absent/empty incoming one.
+    let changed = false;
+    if (phone && existingUser.phone !== phone) {
+      existingUser.phone = phone;
+      changed = true;
+    }
+    existingUser.fullname = existingUser.fullname || {};
+    if (firstName && existingUser.fullname.firstname !== firstName) {
+      existingUser.fullname.firstname = firstName;
+      changed = true;
+    }
+    if (lastName && existingUser.fullname.lastname !== lastName) {
+      existingUser.fullname.lastname = lastName;
+      changed = true;
+    }
+    if (changed) await existingUser.save();
     return existingUser;
   }
 
