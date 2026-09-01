@@ -25,4 +25,13 @@ router.post(
 // Read-only status check — GET only, no `customer` in the request.
 router.get("/status", authSuperApp, bookingController.getBookingStatus);
 
+// Cancel a ride the Super App booked, while it's still pending/accepted
+// (not once a captain has already started or completed it). booking_id is
+// in the JSON body, not a URL path param — the Gateway calling us only
+// ever sends a static registered path (see GatewayService.invoke_endpoint,
+// which never interpolates {placeholders}), so every other mutating
+// endpoint here (createBooking included) takes its identifiers this way
+// too. `reason` is optional free text, validated inline in the controller.
+router.post("/cancel", authSuperApp, bookingController.cancelBooking);
+
 module.exports = router;

@@ -3,6 +3,9 @@ const { validationResult } = require("express-validator");
 const rideModel = require("../models/ride.model");
 const rideService = require("../services/ride.service");
 const userService = require("../services/user.service");
+const mapService = require("../services/map.service");
+const { sendMessageToSocketId } = require("../socket");
+const superappWebhookService = require("../services/superappWebhook.service");
 const { toBookingId, toRideId } = require("../utils/bookingId");
 
 const STATUS_MAP = {
@@ -114,6 +117,59 @@ module.exports.getBookingStatus = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports.cancelBooking = async (req, res) => {
+  const rawBookingId = req.body?.booking_id;
+  if (!rawBookingId) {
+    return res.status(400).json({ message: "booking_id is required" });
+  }
+
+  const rideId = toRideId(rawBookingId);
+  if (!mongoose.Types.ObjectId.isValid(rideId)) {
+    return res.status(400).json({ message: "Invalid booking_id" });
+  }
+
+  const reason = typeof req.body?.reason === "string" ? req.body.reason.trim() : "";
+
+  try {
+    const ride = await rideService.cancelRide({ rideId });
+
+    // Same captain-facing cleanup as the in-app cancel flow (ride.controller.js):
+    // anyone still looking at this ride's "new ride" popup needs to know it's gone.
+    const pickupCoordinates = await mapService.getAddressCoordinate(ride.pickup);
+    const captainsInRadius = await mapService.getCaptainsInTheRadius(
+      pickupCoordinates.ltd,
+      pickupCoordinates.lng,
+      mapService.DEFAULT_SEARCH_RADIUS_KM,
+      ride.vehicle
+    );
+    captainsInRadius.forEach((captain) => {
+      sendMessageToSocketId(captain.socketId, { event: "ride-cancelled", data: ride });
+    });
+
+    superappWebhookService.notifyRideStatus({
+      rideId: ride._id,
+      status: "CANCELLED",
+      captain: ride.captain,
+      message: reason ? `Chuyến đi đã bị hủy. Lý do: ${reason}` : undefined,
+    });
+
+    return res.status(200).json({
+      booking_id: rawBookingId,
+      status: "cancelled",
+      message: reason ? `Chuyến đi đã bị hủy. Lý do: ${reason}` : buildMessage("cancelled"),
+    });
+  } catch (err) {
+    console.error(err);
+    if (err.message === "Ride not found") {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+    if (err.message.startsWith("Cannot cancel")) {
+      return res.status(400).json({ message: err.message });
+    }
     return res.status(500).json({ message: "Internal server error" });
   }
 };

@@ -229,13 +229,7 @@ module.exports.cancelRide = async (req, res) => {
   const { rideId } = req.query;
 
   try {
-    const ride = await rideModel.findOneAndUpdate(
-      { _id: rideId },
-      {
-        status: "cancelled",
-      },
-      { new: true }
-    );
+    const ride = await rideService.cancelRide({ rideId });
 
     const pickupCoordinates = await mapService.getAddressCoordinate(ride.pickup);
     const captainsInRadius = await mapService.getCaptainsInTheRadius(

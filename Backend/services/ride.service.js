@@ -241,3 +241,31 @@ module.exports.endRide = async ({ rideId, captain }) => {
 
   return ride;
 };
+
+// Shared by both the in-app cancel route (ride.controller.js) and the
+// Super App booking API (booking.controller.js) so the same rule applies
+// everywhere: a ride already ongoing/completed/cancelled can't be
+// cancelled — only one still waiting for or with a captain assigned can.
+module.exports.cancelRide = async ({ rideId }) => {
+  if (!rideId) {
+    throw new Error("Ride id is required");
+  }
+
+  const ride = await rideModel
+    .findOne({ _id: rideId })
+    .populate("user")
+    .populate("captain");
+
+  if (!ride) {
+    throw new Error("Ride not found");
+  }
+
+  if (!["pending", "accepted"].includes(ride.status)) {
+    throw new Error(`Cannot cancel a ride that is already ${ride.status}`);
+  }
+
+  await rideModel.findOneAndUpdate({ _id: rideId }, { status: "cancelled" });
+  ride.status = "cancelled";
+
+  return ride;
+};
